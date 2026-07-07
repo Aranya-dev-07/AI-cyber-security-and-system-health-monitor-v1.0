@@ -23,26 +23,30 @@
   --lavender-deep:#7B6BBF;
   --olive-deep:   #5A8040;
 
-  /* Layout */
-  --bg:         #F7F8F4;
-  --surface:    #FFFFFF;
-  --surface-2:  #F0F4EF;
-  --border:     #E8EDE6;
-  --text:       #2D3428;
-  --text-dim:   #6B7560;
-  --text-muted: #9EA897;
+  /* Layout — lavender + olive green background blend */
+  --bg:         #EDE9F5;
+  --bg-2:       #E8F0E0;
+  --surface:    #F8F6FC;
+  --surface-2:  #EEF4E8;
+  --border:     #D6CEEC;
+  --border-2:   #C8DAB8;
+  --text:       #2A2640;
+  --text-dim:   #5C5878;
+  --text-muted: #8E8AAA;
 
   --font-ui:   'DM Sans', sans-serif;
   --font-mono: 'DM Mono', monospace;
   --radius:    16px;
   --radius-sm: 8px;
-  --shadow:    0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
-  --shadow-md: 0 2px 8px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
+  --shadow:    0 1px 3px rgba(120,100,180,0.08), 0 4px 12px rgba(100,140,80,0.06);
+  --shadow-md: 0 2px 8px rgba(120,100,180,0.10), 0 8px 24px rgba(100,140,80,0.08);
 }
 
 html, body, #root {
   height: 100%;
-  background: var(--bg);
+  /* Diagonal gradient blending lavender and olive green */
+  background: linear-gradient(135deg, #EDE9F5 0%, #E8F0E0 50%, #EAE6F2 100%);
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-ui);
   font-size: 14px;
@@ -52,7 +56,7 @@ html, body, #root {
 
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--lavender); border-radius: 3px; }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
