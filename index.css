@@ -3,49 +3,43 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Palette — red, magenta, olive green, lavender */
-  --mint: #D6C7EE; /* lavender (pastel) */
-  --sage: #D6E2A8; /* olive green (pastel) */
-  --peach: #F0BEE0; /* magenta (pastel) */
-  --coral: #F0A8A4; /* red (pastel) */
-  --rose: #E88FB8; /* magenta-red (pastel) */
+  /* Strict 5-color palette */
+  --red:      #E02020;
+  --magenta:  #CC1899;
+  --white:    #FFFFFF;
+  --olive:    #6B8E23;
+  --lavender: #9B87C8;
 
-  /* Extended palette */
-  --lavender: #B8A9D9;
-  --olive: #8FAF6A;
+  /* Tints derived from the 5 colors only */
+  --red-light:      #FDEAEA;
+  --red-deep:       #B01010;
+  --magenta-light:  #FDE6F6;
+  --magenta-deep:   #A01278;
+  --olive-light:    #EBF0DC;
+  --olive-deep:     #4A6318;
+  --lavender-light: #EDE9F8;
+  --lavender-deep:  #6B58A8;
 
-  /* Deeper tones for text/icons */
-  --mint-deep: #7B5FC4; /* lavender deep */
-  --sage-deep: #6B8F3A; /* olive deep */
-  --peach-deep: #C6399C; /* magenta deep */
-  --coral-deep: #D6362E; /* red deep */
-  --rose-deep: #C21E56; /* magenta-red deep */
-  --lavender-deep:#7B6BBF;
-  --olive-deep: #5A8040;
+  /* Layout */
+  --bg:         var(--lavender-light);
+  --surface:    var(--white);
+  --surface-2:  var(--olive-light);
+  --border:     #D4C8EE;
+  --text:       #1E1A30;
+  --text-dim:   #5A5278;
+  --text-muted: #9890B8;
 
-  /* Layout — lavender + olive green background blend */
-  --bg: #D8D0EE;
-  --bg-2: #D0E0B8;
-  --surface: #F0ECF8;
-  --surface-2: #E4EDD8;
-  --border: #C4B8E4;
-  --border-2: #B8CFA0;
-  --text: #2A2640;
-  --text-dim: #5C5878;
-  --text-muted: #8E8AAA;
-
-  --font-ui: 'DM Sans', sans-serif;
+  --font-ui:   'DM Sans', sans-serif;
   --font-mono: 'DM Mono', monospace;
-  --radius: 16px;
+  --radius:    16px;
   --radius-sm: 8px;
-  --shadow: 0 1px 3px rgba(120,100,180,0.08), 0 4px 12px rgba(100,140,80,0.06);
-  --shadow-md: 0 2px 8px rgba(120,100,180,0.10), 0 8px 24px rgba(100,140,80,0.08);
+  --shadow:    0 1px 4px rgba(155,135,200,0.15), 0 4px 14px rgba(107,142,35,0.08);
+  --shadow-md: 0 2px 8px rgba(155,135,200,0.18), 0 8px 24px rgba(107,142,35,0.10);
 }
 
 html, body, #root {
   height: 100%;
-  /* Diagonal gradient blending lavender, magenta, red and olive green */
-  background: linear-gradient(135deg, #C8BEDF 0%, #E0A8CE 35%, #D68A8A 65%, #C0D494 100%);
+  background: linear-gradient(135deg, #DDD6F0 0%, #D8E4B8 40%, #DDD6F0 70%, #D4DEB0 100%);
   background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-ui);
@@ -60,9 +54,9 @@ html, body, #root {
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+  50%       { opacity: 0.35; }
 }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
