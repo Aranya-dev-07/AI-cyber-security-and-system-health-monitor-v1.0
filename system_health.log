@@ -66,3 +66,55 @@
 2026-07-07 11:17:16,339 [INFO] config: Generated run summary: duration=109.27s avg_cpu=15.30% avg_ram=94.45% avg_disk=67.50% alerts=6
 2026-07-07 11:17:16,356 [INFO] database: Updated test_run id=2 with end_time and final alert_count.
 2026-07-07 11:17:16,359 [INFO] __main__: stop_monitoring() completed for run_id=2.
+2026-07-07 11:21:43,339 [INFO] dashboard: Dashboard mounted at /dashboard/ (serving from 'C:\Users\Tapas\AI-cyber-security-and-system-health-monitor-v1.0\AI-cyber-security-and-system-health-monitor-v1.0\dashboard\dist').
+2026-07-07 11:21:43,343 [INFO] database: Database initialized successfully at 'system_monitor.db'.
+2026-07-07 11:21:43,344 [INFO] ai_engine: Isolation Forest initialized: n_estimators=100 contamination=auto
+2026-07-07 11:21:43,344 [INFO] ai_engine: No saved model found at 'C:\Users\Tapas\AI-cyber-security-and-system-health-monitor-v1.0\AI-cyber-security-and-system-health-monitor-v1.0\models\isolation_forest.joblib'. Will train from scratch once 10 samples are collected.
+2026-07-07 11:21:43,345 [INFO] __main__: API server thread launched.
+2026-07-07 11:21:43,431 [INFO] __main__: Starting FastAPI server on http://127.0.0.1:8000
+2026-07-07 11:21:43,568 [INFO] database: Database initialized successfully at 'system_monitor.db'.
+2026-07-07 11:21:43,569 [INFO] api: API startup complete: database initialized.
+2026-07-07 11:21:49,222 [INFO] database: Inserted test_run row with id=3.
+2026-07-07 11:21:49,228 [INFO] __main__: Stamped Run 3 header into CSV files.
+2026-07-07 11:21:49,230 [INFO] __main__: Monitoring loop started for run_id=3.
+2026-07-07 11:21:49,231 [INFO] __main__: start_monitoring() succeeded; run_id=3.
+2026-07-07 11:21:50,264 [WARNING] config: ALERT triggered for RAM: value=90.80 exceeded threshold=85.00
+2026-07-07 11:21:50,265 [INFO] config: Collected system metrics: CPU=12.4% RAM=90.8% DISK=67.5% NET_SENT=0.000MB NET_RECV=0.000MB
+2026-07-07 11:22:02,552 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 11:22:03,641 [WARNING] config: ALERT triggered for RAM: value=91.60 exceeded threshold=85.00
+2026-07-07 11:22:03,642 [INFO] config: Collected system metrics: CPU=18.2% RAM=91.6% DISK=67.5% NET_SENT=0.130MB NET_RECV=0.231MB
+2026-07-07 11:22:22,087 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 11:22:23,168 [WARNING] config: ALERT triggered for RAM: value=91.20 exceeded threshold=85.00
+2026-07-07 11:22:23,170 [INFO] config: Collected system metrics: CPU=15.1% RAM=91.2% DISK=67.5% NET_SENT=0.055MB NET_RECV=0.266MB
+2026-07-07 11:22:42,865 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 11:22:43,929 [WARNING] config: ALERT triggered for RAM: value=91.60 exceeded threshold=85.00
+2026-07-07 11:22:43,931 [INFO] config: Collected system metrics: CPU=15.8% RAM=91.6% DISK=67.5% NET_SENT=0.103MB NET_RECV=0.268MB
+2026-07-07 11:23:03,212 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 11:23:04,312 [WARNING] config: ALERT triggered for RAM: value=91.50 exceeded threshold=85.00
+2026-07-07 11:23:04,313 [INFO] config: Collected system metrics: CPU=16.7% RAM=91.5% DISK=67.5% NET_SENT=0.239MB NET_RECV=2.166MB
+2026-07-07 11:23:22,254 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 11:23:23,341 [WARNING] config: ALERT triggered for RAM: value=91.30 exceeded threshold=85.00
+2026-07-07 11:23:23,344 [INFO] config: Collected system metrics: CPU=9.7% RAM=91.3% DISK=67.5% NET_SENT=0.116MB NET_RECV=0.355MB
+2026-07-07 11:23:42,294 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 11:23:43,386 [WARNING] config: ALERT triggered for RAM: value=90.80 exceeded threshold=85.00
+2026-07-07 11:23:43,388 [INFO] config: Collected system metrics: CPU=9.9% RAM=90.8% DISK=67.5% NET_SENT=0.050MB NET_RECV=0.422MB
+2026-07-07 11:24:01,862 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 11:24:02,958 [WARNING] config: ALERT triggered for RAM: value=91.00 exceeded threshold=85.00
+2026-07-07 11:24:02,959 [INFO] config: Collected system metrics: CPU=12.6% RAM=91.0% DISK=67.5% NET_SENT=0.038MB NET_RECV=0.347MB
+2026-07-07 11:24:22,095 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 11:24:23,191 [WARNING] config: ALERT triggered for RAM: value=90.70 exceeded threshold=85.00
+2026-07-07 11:24:23,192 [INFO] config: Collected system metrics: CPU=7.8% RAM=90.7% DISK=67.5% NET_SENT=0.015MB NET_RECV=0.343MB
+2026-07-07 11:24:41,320 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 11:24:42,407 [WARNING] config: ALERT triggered for RAM: value=91.80 exceeded threshold=85.00
+2026-07-07 11:24:42,409 [INFO] config: Collected system metrics: CPU=16.4% RAM=91.8% DISK=67.5% NET_SENT=0.105MB NET_RECV=0.399MB
+2026-07-07 11:25:00,121 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 11:25:00,702 [INFO] ai_engine: Model saved to 'C:\Users\Tapas\AI-cyber-security-and-system-health-monitor-v1.0\AI-cyber-security-and-system-health-monitor-v1.0\models\isolation_forest.joblib'.
+2026-07-07 11:25:00,703 [INFO] ai_engine: Isolation Forest trained on 10 samples (13 features).
+2026-07-07 11:25:01,736 [WARNING] config: ALERT triggered for RAM: value=92.30 exceeded threshold=85.00
+2026-07-07 11:25:01,736 [INFO] config: Collected system metrics: CPU=20.6% RAM=92.3% DISK=67.5% NET_SENT=0.307MB NET_RECV=4.335MB
+2026-07-07 11:25:11,412 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 11:25:11,473 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=100.0% score=-0.6074 | Network throughput (4.642 MB) is 3.7x the learned baseline (1.244 MB) — possible data exfiltration or spike. | RAM usage (92.3%) exceeds the configured threshold (85.0%). | Multiple abnormal metrics detected simultaneously — possible coordinated resource exhaustion or attack.
+2026-07-07 11:25:11,505 [INFO] __main__: Monitoring loop exited cleanly for run_id=3.
+2026-07-07 11:25:11,506 [INFO] config: Generated run summary: duration=202.32s avg_cpu=14.11% avg_ram=91.33% avg_disk=67.50% alerts=11
+2026-07-07 11:25:11,531 [INFO] database: Updated test_run id=3 with end_time and final alert_count.
+2026-07-07 11:25:11,535 [INFO] __main__: stop_monitoring() completed for run_id=3.
