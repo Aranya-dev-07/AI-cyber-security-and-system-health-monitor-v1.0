@@ -6,12 +6,12 @@ import {
 } from 'recharts'
 
 // ─── constants ───────────────────────────────────────────────────────────────
-const API     = ''
+const API = ''
 const POLL_MS = 5000
 const MAX_HIST = 40
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
-const fmt  = (v, d = 1) => (v == null ? '—' : Number(v).toFixed(d))
+const fmt = (v, d = 1) => (v == null ? '—' : Number(v).toFixed(d))
 const fmtT = iso => {
   if (!iso) return '—'
   return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
@@ -27,7 +27,7 @@ function severityBg(s) {
 }
 function metricColor(val, warn = 70, danger = 85) {
   if (val >= danger) return 'var(--rose-deep)'
-  if (val >= warn)   return 'var(--coral-deep)'
+  if (val >= warn) return 'var(--coral-deep)'
   return 'var(--mint-deep)'
 }
 
@@ -96,12 +96,12 @@ function Card({ children, style = {} }) {
 function StatStrip({ metric }) {
   if (!metric) return null
   const items = [
-    { label: 'CPU',      val: `${fmt(metric.cpu_percent)} %`,          color: 'var(--mint-deep)' },
-    { label: 'RAM',      val: `${fmt(metric.ram_percent)} %`,          color: 'var(--lavender-deep)' },
-    { label: 'Disk',     val: `${fmt(metric.disk_percent)} %`,         color: 'var(--peach-deep)' },
-    { label: 'Sent',     val: `${fmt(metric.net_sent_mb, 3)} MB`,      color: 'var(--sage-deep)' },
-    { label: 'Received', val: `${fmt(metric.net_recv_mb, 3)} MB`,      color: 'var(--olive-deep)' },
-    { label: 'Time',     val: fmtT(metric.timestamp),                  color: 'var(--text-dim)' },
+    { label: 'CPU', val: `${fmt(metric.cpu_percent)} %`, color: 'var(--mint-deep)' },
+    { label: 'RAM', val: `${fmt(metric.ram_percent)} %`, color: 'var(--lavender-deep)' },
+    { label: 'Disk', val: `${fmt(metric.disk_percent)} %`, color: 'var(--peach-deep)' },
+    { label: 'Sent', val: `${fmt(metric.net_sent_mb, 3)} MB`, color: 'var(--sage-deep)' },
+    { label: 'Received', val: `${fmt(metric.net_recv_mb, 3)} MB`, color: 'var(--olive-deep)' },
+    { label: 'Time', val: fmtT(metric.timestamp), color: 'var(--text-dim)' },
   ]
   return (
     <div style={S.strip}>
@@ -125,7 +125,7 @@ function AreaChartCard({ title, subtitle, dot, data, lines }) {
           <defs>
             {lines.map(l => (
               <linearGradient key={l.key} id={`grad-${l.key}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor={l.color} stopOpacity={0.25}/>
+                <stop offset="5%" stopColor={l.color} stopOpacity={0.25}/>
                 <stop offset="95%" stopColor={l.color} stopOpacity={0}/>
               </linearGradient>
             ))}
@@ -224,8 +224,8 @@ function AIPanel({ stats, anomalies }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 16 }}>
         {[
           { label: 'Total Detected', val: stats?.total_anomalies ?? '—', color: 'var(--lavender-deep)' },
-          { label: 'Critical',       val: stats?.critical_count  ?? '—', color: 'var(--rose-deep)' },
-          { label: 'High',           val: stats?.high_count      ?? '—', color: 'var(--coral-deep)' },
+          { label: 'Critical', val: stats?.critical_count ?? '—', color: 'var(--rose-deep)' },
+          { label: 'High', val: stats?.high_count ?? '—', color: 'var(--coral-deep)' },
           { label: 'Avg Confidence', val: stats ? `${fmt(stats.avg_confidence)}%` : '—', color: 'var(--mint-deep)' },
         ].map(({ label, val, color }) => (
           <div key={label} style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '12px 14px' }}>
@@ -281,14 +281,14 @@ function LiveClock() {
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [metric,   setMetric]   = useState(null)
-  const [procs,    setProcs]    = useState([])
-  const [runs,     setRuns]     = useState([])
-  const [history,  setHistory]  = useState([])
-  const [healthy,  setHealthy]  = useState(false)
+  const [metric, setMetric] = useState(null)
+  const [procs, setProcs] = useState([])
+  const [runs, setRuns] = useState([])
+  const [history, setHistory] = useState([])
+  const [healthy, setHealthy] = useState(false)
   const [lastPoll, setLastPoll] = useState(null)
-  const [error,    setError]    = useState(null)
-  const [aiStats,  setAiStats]  = useState(null)
+  const [error, setError] = useState(null)
+  const [aiStats, setAiStats] = useState(null)
   const [anomalies,setAnomalies]= useState([])
 
   const histRef = useRef([])
@@ -321,7 +321,7 @@ export default function App() {
     } catch (e) {
       if (e.response?.status === 404) {
         setHealthy(true)
-        setError('Monitoring not started yet — type  start  in the terminal.')
+        setError('Monitoring not started yet — type start in the terminal.')
       } else {
         setHealthy(false)
         setError('Cannot reach the API — is main.py running?')
@@ -350,15 +350,15 @@ export default function App() {
       </header>
 
       {/* ERROR BANNER */}
-      {error && <div style={S.errorBanner}>⚠  {error}</div>}
+      {error && <div style={S.errorBanner}>⚠ {error}</div>}
 
       <main style={S.main}>
 
         {/* GAUGES */}
         <div style={S.gaugeRow}>
-          <Gauge label="CPU"     value={metric?.cpu_percent}  color="var(--mint-deep)"    warn={70} danger={85}/>
-          <Gauge label="RAM"     value={metric?.ram_percent}  color="var(--lavender-deep)" warn={70} danger={85}/>
-          <Gauge label="Disk"    value={metric?.disk_percent} color="var(--peach-deep)"   warn={80} danger={90}/>
+          <Gauge label="CPU" value={metric?.cpu_percent} color="var(--mint-deep)" warn={70} danger={85}/>
+          <Gauge label="RAM" value={metric?.ram_percent} color="var(--lavender-deep)" warn={70} danger={85}/>
+          <Gauge label="Disk" value={metric?.disk_percent} color="var(--peach-deep)" warn={80} danger={90}/>
           <Gauge label="Network" value={metric ? Math.min(100,((metric.net_sent_mb+metric.net_recv_mb)/100)*100) : null}
             color="var(--sage-deep)" unit="MB/poll" warn={50} danger={90}/>
         </div>
@@ -371,8 +371,8 @@ export default function App() {
           title="CPU & RAM" subtitle="Usage over time" dot="var(--mint)"
           data={history}
           lines={[
-            { key: 'cpu', name: 'CPU %',  color: 'var(--mint-deep)' },
-            { key: 'ram', name: 'RAM %',  color: 'var(--lavender-deep)' },
+            { key: 'cpu', name: 'CPU %', color: 'var(--mint-deep)' },
+            { key: 'ram', name: 'RAM %', color: 'var(--lavender-deep)' },
           ]}
         />
 
@@ -407,21 +407,21 @@ export default function App() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const S = {
   root: { minHeight: '100vh', display: 'flex', flexDirection: 'column', animation: 'fadeIn 0.3s ease' },
-  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 28px', background: 'linear-gradient(90deg, #C4BADC 0%, #BACE98 100%)', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, zIndex: 10, boxShadow: 'var(--shadow)' },
+  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 28px', background: 'linear-gradient(90deg, #C9B8E0 0%, #C9A8D0 50%, #B8C98A 100%)', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, zIndex: 10, boxShadow: 'var(--shadow)' },
   headerTitle: { fontWeight: 700, fontSize: 15, color: 'var(--text)' },
-  logoMark: { width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #8B7CC8 0%, #6A9040 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700 },
+  logoMark: { width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #8B7CC8 0%, #C6399C 50%, #6A9040 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700 },
   main: { padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1400, width: '100%', margin: '0 auto' },
   errorBanner: { background: 'var(--peach)', borderBottom: '1px solid var(--coral)', color: 'var(--peach-deep)', padding: '10px 28px', fontSize: 13, fontFamily: 'var(--font-mono)' },
   gaugeRow: { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14 },
-  gaugeCard: { background: 'linear-gradient(145deg, #EDE8F8 0%, #E0EDD0 100%)', borderRadius: 'var(--radius)', padding: '20px 16px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, boxShadow: 'var(--shadow)', border: '1px solid var(--border)' },
+  gaugeCard: { background: 'linear-gradient(145deg, #EDE8F8 0%, #F5DCE8 50%, #E0EDD0 100%)', borderRadius: 'var(--radius)', padding: '20px 16px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, boxShadow: 'var(--shadow)', border: '1px solid var(--border)' },
   gaugeLabel: { fontWeight: 600, fontSize: 12, letterSpacing: 0.8, color: 'var(--text-dim)', textTransform: 'uppercase' },
   badge: { borderRadius: 20, padding: '2px 10px', fontSize: 10, fontWeight: 700, letterSpacing: 0.5 },
   strip: { display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 1, background: 'var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden', boxShadow: 'var(--shadow)' },
-  stripItem: { background: 'linear-gradient(160deg, #EAE5F5 0%, #DDE8CC 100%)', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 4 },
+  stripItem: { background: 'linear-gradient(160deg, #EAE5F5 0%, #F2DCE8 50%, #DDE8CC 100%)', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 4 },
   stripLabel: { fontSize: 10, fontWeight: 600, letterSpacing: 0.8, color: 'var(--text-muted)', textTransform: 'uppercase' },
   stripVal: { fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 600 },
   chartRow: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 },
-  card: { background: 'linear-gradient(150deg, #EAE5F5 0%, #DDE8CC 100%)', borderRadius: 'var(--radius)', padding: '20px 22px', boxShadow: 'var(--shadow)', border: '1px solid var(--border)' },
+  card: { background: 'linear-gradient(150deg, #EAE5F5 0%, #F2DCE8 50%, #DDE8CC 100%)', borderRadius: 'var(--radius)', padding: '20px 22px', boxShadow: 'var(--shadow)', border: '1px solid var(--border)' },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: { textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 700, letterSpacing: 0.8, color: 'var(--text-muted)', textTransform: 'uppercase', borderBottom: '1px solid var(--border)' },
   td: { padding: '10px 12px', fontSize: 13, borderBottom: '1px solid var(--border)', color: 'var(--text)' },
