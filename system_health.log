@@ -32,3 +32,11 @@
 2026-07-07 10:32:38,332 [INFO] config: Generated run summary: duration=104.35s avg_cpu=15.73% avg_ram=88.13% avg_disk=67.60% alerts=6
 2026-07-07 10:32:38,353 [INFO] database: Updated test_run id=1 with end_time and final alert_count.
 2026-07-07 10:32:38,354 [INFO] __main__: stop_monitoring() completed for run_id=1.
+2026-07-07 11:15:20,741 [INFO] dashboard: Dashboard mounted at /dashboard/ (serving from 'C:\Users\Tapas\AI-cyber-security-and-system-health-monitor-v1.0\AI-cyber-security-and-system-health-monitor-v1.0\dashboard\dist').
+2026-07-07 11:15:20,759 [INFO] database: Database initialized successfully at 'system_monitor.db'.
+2026-07-07 11:15:20,759 [INFO] ai_engine: Isolation Forest initialized: n_estimators=100 contamination=auto
+2026-07-07 11:15:20,759 [INFO] ai_engine: No saved model found at 'C:\Users\Tapas\AI-cyber-security-and-system-health-monitor-v1.0\AI-cyber-security-and-system-health-monitor-v1.0\models\isolation_forest.joblib'. Will train from scratch once 10 samples are collected.
+2026-07-07 11:15:20,771 [INFO] __main__: API server thread launched.
+2026-07-07 11:15:20,878 [INFO] __main__: Starting FastAPI server on http://127.0.0.1:8000
+2026-07-07 11:15:21,069 [INFO] database: Database initialized successfully at 'system_monitor.db'.
+2026-07-07 11:15:21,071 [INFO] api: API startup complete: database initialized.
