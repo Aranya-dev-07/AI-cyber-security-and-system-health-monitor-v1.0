@@ -1,0 +1,34 @@
+2026-07-07 10:30:49,504 [INFO] dashboard: Dashboard mounted at /dashboard/ (serving from 'C:\Users\Tapas\AI-cyber-security-and-system-health-monitor-v1.0\AI-cyber-security-and-system-health-monitor-v1.0\dashboard\dist').
+2026-07-07 10:30:49,565 [INFO] database: Database initialized successfully at 'system_monitor.db'.
+2026-07-07 10:30:49,568 [INFO] ai_engine: Isolation Forest initialized: n_estimators=100 contamination=auto
+2026-07-07 10:30:49,569 [INFO] ai_engine: No saved model found at 'C:\Users\Tapas\AI-cyber-security-and-system-health-monitor-v1.0\AI-cyber-security-and-system-health-monitor-v1.0\models\isolation_forest.joblib'. Will train from scratch once 10 samples are collected.
+2026-07-07 10:30:49,571 [INFO] __main__: API server thread launched.
+2026-07-07 10:30:49,646 [INFO] __main__: Starting FastAPI server on http://127.0.0.1:8000
+2026-07-07 10:30:49,791 [INFO] database: Database initialized successfully at 'system_monitor.db'.
+2026-07-07 10:30:49,792 [INFO] api: API startup complete: database initialized.
+2026-07-07 10:30:54,032 [INFO] database: Inserted test_run row with id=1.
+2026-07-07 10:30:54,040 [INFO] __main__: Stamped Run 1 header into CSV files.
+2026-07-07 10:30:54,041 [INFO] __main__: Monitoring loop started for run_id=1.
+2026-07-07 10:30:54,042 [INFO] __main__: start_monitoring() succeeded; run_id=1.
+2026-07-07 10:30:55,102 [WARNING] config: ALERT triggered for RAM: value=88.70 exceeded threshold=85.00
+2026-07-07 10:30:55,103 [INFO] config: Collected system metrics: CPU=10.7% RAM=88.7% DISK=67.6% NET_SENT=0.000MB NET_RECV=0.000MB
+2026-07-07 10:31:12,340 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 10:31:13,398 [WARNING] config: ALERT triggered for RAM: value=87.20 exceeded threshold=85.00
+2026-07-07 10:31:13,398 [INFO] config: Collected system metrics: CPU=16.4% RAM=87.2% DISK=67.6% NET_SENT=0.075MB NET_RECV=0.037MB
+2026-07-07 10:31:31,968 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 10:31:33,025 [WARNING] config: ALERT triggered for RAM: value=88.10 exceeded threshold=85.00
+2026-07-07 10:31:33,026 [INFO] config: Collected system metrics: CPU=32.0% RAM=88.1% DISK=67.6% NET_SENT=0.061MB NET_RECV=0.124MB
+2026-07-07 10:31:51,042 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 10:31:52,138 [WARNING] config: ALERT triggered for RAM: value=88.10 exceeded threshold=85.00
+2026-07-07 10:31:52,139 [INFO] config: Collected system metrics: CPU=11.8% RAM=88.1% DISK=67.6% NET_SENT=0.038MB NET_RECV=0.120MB
+2026-07-07 10:32:09,845 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 10:32:10,925 [WARNING] config: ALERT triggered for RAM: value=88.00 exceeded threshold=85.00
+2026-07-07 10:32:10,926 [INFO] config: Collected system metrics: CPU=8.8% RAM=88.0% DISK=67.6% NET_SENT=0.033MB NET_RECV=0.021MB
+2026-07-07 10:32:29,375 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 10:32:30,417 [WARNING] config: ALERT triggered for RAM: value=88.70 exceeded threshold=85.00
+2026-07-07 10:32:30,417 [INFO] config: Collected system metrics: CPU=14.7% RAM=88.7% DISK=67.6% NET_SENT=0.063MB NET_RECV=0.235MB
+2026-07-07 10:32:38,308 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 10:32:38,330 [INFO] __main__: Monitoring loop exited cleanly for run_id=1.
+2026-07-07 10:32:38,332 [INFO] config: Generated run summary: duration=104.35s avg_cpu=15.73% avg_ram=88.13% avg_disk=67.60% alerts=6
+2026-07-07 10:32:38,353 [INFO] database: Updated test_run id=1 with end_time and final alert_count.
+2026-07-07 10:32:38,354 [INFO] __main__: stop_monitoring() completed for run_id=1.

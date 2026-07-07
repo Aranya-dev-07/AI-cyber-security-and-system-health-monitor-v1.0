@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Palette from uploaded image */
+  --mint:    #A8E5CE;
+  --sage:    #DBECC1;
+  --peach:   #FED2B6;
+  --coral:   #FEA9A5;
+  --rose:    #FE8B94;
+
+  /* Extended palette */
+  --lavender: #B8A9D9;
+  --olive:    #8FAF6A;
+
+  /* Deeper tones for text/icons */
+  --mint-deep:    #2BAF80;
+  --sage-deep:    #6A9E4A;
+  --peach-deep:   #E8844A;
+  --coral-deep:   #E05550;
+  --rose-deep:    #D63048;
+  --lavender-deep:#7B6BBF;
+  --olive-deep:   #5A8040;
+
+  /* Layout */
+  --bg:         #F7F8F4;
+  --surface:    #FFFFFF;
+  --surface-2:  #F0F4EF;
+  --border:     #E8EDE6;
+  --text:       #2D3428;
+  --text-dim:   #6B7560;
+  --text-muted: #9EA897;
+
+  --font-ui:   'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --radius:    16px;
+  --radius-sm: 8px;
+  --shadow:    0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
