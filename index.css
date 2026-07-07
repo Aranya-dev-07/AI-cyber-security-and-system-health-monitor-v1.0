@@ -24,12 +24,12 @@
   --olive-deep:   #5A8040;
 
   /* Layout — lavender + olive green background blend */
-  --bg:         #EDE9F5;
-  --bg-2:       #E8F0E0;
-  --surface:    #F8F6FC;
-  --surface-2:  #EEF4E8;
-  --border:     #D6CEEC;
-  --border-2:   #C8DAB8;
+  --bg:         #D8D0EE;
+  --bg-2:       #D0E0B8;
+  --surface:    #F0ECF8;
+  --surface-2:  #E4EDD8;
+  --border:     #C4B8E4;
+  --border-2:   #B8CFA0;
   --text:       #2A2640;
   --text-dim:   #5C5878;
   --text-muted: #8E8AAA;
@@ -45,7 +45,7 @@
 html, body, #root {
   height: 100%;
   /* Diagonal gradient blending lavender and olive green */
-  background: linear-gradient(135deg, #EDE9F5 0%, #E8F0E0 50%, #EAE6F2 100%);
+  background: linear-gradient(135deg, #C8BEDF 0%, #C4D8A0 35%, #C8BEDF 65%, #C0D494 100%);
   background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-ui);
