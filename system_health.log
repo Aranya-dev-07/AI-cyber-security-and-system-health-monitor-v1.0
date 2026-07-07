@@ -174,3 +174,47 @@
 2026-07-07 16:13:14,083 [INFO] __main__: Starting FastAPI server on http://127.0.0.1:8000
 2026-07-07 16:13:14,206 [INFO] database: Database initialized successfully at 'system_monitor.db'.
 2026-07-07 16:13:14,207 [INFO] api: API startup complete: database initialized.
+2026-07-07 16:13:17,003 [INFO] database: Inserted test_run row with id=5.
+2026-07-07 16:13:17,039 [INFO] __main__: Stamped Run 5 header into CSV files.
+2026-07-07 16:13:17,042 [INFO] __main__: Monitoring loop started for run_id=5.
+2026-07-07 16:13:17,042 [INFO] __main__: start_monitoring() succeeded; run_id=5.
+2026-07-07 16:13:18,105 [WARNING] config: ALERT triggered for RAM: value=92.20 exceeded threshold=85.00
+2026-07-07 16:13:18,106 [INFO] config: Collected system metrics: CPU=21.7% RAM=92.2% DISK=68.0% NET_SENT=0.000MB NET_RECV=0.000MB
+2026-07-07 16:13:34,851 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 16:13:34,914 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=100.0% score=-0.5879 | RAM usage (92.2%) exceeds the configured threshold (85.0%).
+2026-07-07 16:13:35,971 [WARNING] config: ALERT triggered for RAM: value=92.40 exceeded threshold=85.00
+2026-07-07 16:13:35,971 [INFO] config: Collected system metrics: CPU=24.1% RAM=92.4% DISK=68.0% NET_SENT=0.074MB NET_RECV=0.120MB
+2026-07-07 16:13:53,072 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 16:13:53,146 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=100.0% score=-0.5047 | RAM usage (92.4%) exceeds the configured threshold (85.0%).
+2026-07-07 16:13:54,208 [WARNING] config: ALERT triggered for RAM: value=91.70 exceeded threshold=85.00
+2026-07-07 16:13:54,209 [INFO] config: Collected system metrics: CPU=11.6% RAM=91.7% DISK=68.0% NET_SENT=0.049MB NET_RECV=0.112MB
+2026-07-07 16:14:13,037 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 16:14:13,078 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=98.3% score=-0.4835 | RAM usage (91.7%) exceeds the configured threshold (85.0%).
+2026-07-07 16:14:14,137 [WARNING] config: ALERT triggered for RAM: value=92.30 exceeded threshold=85.00
+2026-07-07 16:14:14,138 [INFO] config: Collected system metrics: CPU=16.3% RAM=92.3% DISK=68.0% NET_SENT=0.056MB NET_RECV=0.047MB
+2026-07-07 16:14:33,579 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 16:14:33,629 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=97.2% score=-0.4719 | RAM usage (92.3%) exceeds the configured threshold (85.0%).
+2026-07-07 16:14:34,689 [WARNING] config: ALERT triggered for RAM: value=90.80 exceeded threshold=85.00
+2026-07-07 16:14:34,690 [INFO] config: Collected system metrics: CPU=16.7% RAM=90.8% DISK=68.0% NET_SENT=0.086MB NET_RECV=0.073MB
+2026-07-07 16:14:53,454 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 16:14:53,501 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=99.4% score=-0.4944 | RAM usage (90.8%) exceeds the configured threshold (85.0%).
+2026-07-07 16:14:54,576 [WARNING] config: ALERT triggered for RAM: value=90.40 exceeded threshold=85.00
+2026-07-07 16:14:54,577 [INFO] config: Collected system metrics: CPU=8.5% RAM=90.4% DISK=68.0% NET_SENT=0.034MB NET_RECV=0.110MB
+2026-07-07 16:15:13,590 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 16:15:13,659 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=100.0% score=-0.5310 | RAM usage (90.4%) exceeds the configured threshold (85.0%).
+2026-07-07 16:15:14,719 [WARNING] config: ALERT triggered for RAM: value=90.50 exceeded threshold=85.00
+2026-07-07 16:15:14,720 [INFO] config: Collected system metrics: CPU=10.5% RAM=90.5% DISK=68.0% NET_SENT=0.020MB NET_RECV=0.017MB
+2026-07-07 16:15:33,306 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 16:15:33,388 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=100.0% score=-0.5221 | RAM usage (90.5%) exceeds the configured threshold (85.0%).
+2026-07-07 16:15:34,453 [WARNING] config: ALERT triggered for RAM: value=90.60 exceeded threshold=85.00
+2026-07-07 16:15:34,454 [INFO] config: Collected system metrics: CPU=11.4% RAM=90.6% DISK=68.0% NET_SENT=0.011MB NET_RECV=0.009MB
+2026-07-07 16:15:44,492 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 16:15:44,529 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=100.0% score=-0.5231 | RAM usage (90.6%) exceeds the configured threshold (85.0%).
+2026-07-07 16:15:45,565 [WARNING] config: ALERT triggered for RAM: value=90.70 exceeded threshold=85.00
+2026-07-07 16:15:45,565 [INFO] config: Collected system metrics: CPU=7.9% RAM=90.7% DISK=68.0% NET_SENT=0.022MB NET_RECV=0.020MB
+2026-07-07 16:15:54,469 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-07 16:15:54,532 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=100.0% score=-0.5360 | RAM usage (90.7%) exceeds the configured threshold (85.0%).
+2026-07-07 16:15:54,553 [INFO] __main__: Monitoring loop exited cleanly for run_id=5.
+2026-07-07 16:15:54,554 [INFO] config: Generated run summary: duration=157.62s avg_cpu=14.30% avg_ram=91.29% avg_disk=68.00% alerts=9
+2026-07-07 16:15:54,576 [INFO] database: Updated test_run id=5 with end_time and final alert_count.
+2026-07-07 16:15:54,576 [INFO] __main__: stop_monitoring() completed for run_id=5.
