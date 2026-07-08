@@ -14,35 +14,35 @@ ARCHITECTURE
 The module is built around a single class ``AnomalyDetectionEngine``
 that owns the full ML lifecycle:
 
-    1. Initialization   — model + scaler creation (``initialize_model``)
+    1. Initialization — model + scaler creation (``initialize_model``)
     2. Data preparation — feature engineering + scaling (``prepare_training_data``)
-    3. Training         — Isolation Forest fitting (``train_model``)
-    4. Inference        — per-cycle anomaly scoring (``predict_anomaly``)
-    5. Alerting         — intelligent human-readable alerts (``generate_ai_alert``)
-    6. Persistence      — joblib save/load (``save_model`` / ``load_model``)
-    7. Health scoring   — composite system health (``compute_health_score``)
-    8. Root cause       — metric attribution (``analyze_root_cause``)
-    9. Trend analysis   — rolling trend detection (``analyze_trends``)
+    3. Training — Isolation Forest fitting (``train_model``)
+    4. Inference — per-cycle anomaly scoring (``predict_anomaly``)
+    5. Alerting — intelligent human-readable alerts (``generate_ai_alert``)
+    6. Persistence — joblib save/load (``save_model`` / ``load_model``)
+    7. Health scoring — composite system health (``compute_health_score``)
+    8. Root cause — metric attribution (``analyze_root_cause``)
+    9. Trend analysis — rolling trend detection (``analyze_trends``)
     10. Recommendations — actionable advice (``generate_recommendations``)
-    11. Timeline        — chronological event log (``get_timeline``)
-    12. Insights        — NL system summary (``generate_insights``)
+    11. Timeline — chronological event log (``get_timeline``)
+    12. Insights — NL system summary (``generate_insights``)
     13. Historical comparison — baseline deviation (``compare_to_baseline``)
 
 DATA FLOW
 ----------
     config.py (metrics_data + process_data)
         ↓
-    prepare_training_data()   — cleans, engineers, scales features
+    prepare_training_data() — cleans, engineers, scales features
         ↓
-    train_model()             — fits Isolation Forest on historical data
-        ↓  [every monitoring cycle]
-    predict_anomaly(metric)   — returns AnomalyPrediction dataclass
+    train_model() — fits Isolation Forest on historical data
+        ↓ [every monitoring cycle]
+    predict_anomaly(metric) — returns AnomalyPrediction dataclass
         ↓
-    generate_ai_alert()       — prints structured alert to terminal
+    generate_ai_alert() — prints structured alert to terminal
         ↓
-    database.insert_ai_prediction()   — persists result to SQLite
+    database.insert_ai_prediction() — persists result to SQLite
         ↓
-    api.py GET /ai/*          — exposes predictions to the dashboard
+    api.py GET /ai/* — exposes predictions to the dashboard
 
 WHY ISOLATION FOREST
 ---------------------
@@ -62,8 +62,8 @@ additional locking. Training (a write operation) is protected by
 
 MODEL PERSISTENCE
 ------------------
-    models/isolation_forest.joblib   — fitted IsolationForest object
-    models/scaler.joblib             — fitted StandardScaler object
+    models/isolation_forest.joblib — fitted IsolationForest object
+    models/scaler.joblib — fitted StandardScaler object
 """
 
 from __future__ import annotations
@@ -88,9 +88,9 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-_HERE       = os.path.dirname(os.path.abspath(__file__))
-MODELS_DIR  = os.path.join(_HERE, "models")
-MODEL_PATH  = os.path.join(MODELS_DIR, "isolation_forest.joblib")
+_HERE = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.path.join(_HERE, "models")
+MODEL_PATH = os.path.join(MODELS_DIR, "isolation_forest.joblib")
 SCALER_PATH = os.path.join(MODELS_DIR, "scaler.joblib")
 
 os.makedirs(MODELS_DIR, exist_ok=True)
@@ -120,13 +120,13 @@ class ModelConfig:
         zscore_spike_threshold: Z-score above which a single-feature
             spike is flagged in the reason string.
     """
-    n_estimators:          int   = 100
-    contamination:         Any   = "auto"
-    max_samples:           Any   = "auto"
-    random_state:          int   = 42
-    rolling_window:        int   = 20
-    min_train_samples:     int   = 10
-    retrain_interval:      int   = 100
+    n_estimators: int = 100
+    contamination: Any = "auto"
+    max_samples: Any = "auto"
+    random_state: int = 42
+    rolling_window: int = 20
+    min_train_samples: int = 10
+    retrain_interval: int = 100
     zscore_spike_threshold: float = 2.5
 
 
@@ -153,14 +153,14 @@ class AnomalyPrediction:
         model_tier: Which model tier produced this prediction
             (``"isolation_forest"`` for Tier 1).
     """
-    timestamp:     str
-    is_anomaly:    bool
+    timestamp: str
+    is_anomaly: bool
     anomaly_score: float
-    confidence:    float
-    severity:      str
-    reason:        str
+    confidence: float
+    severity: str
+    reason: str
     features_used: List[str] = field(default_factory=list)
-    model_tier:    str       = "isolation_forest"
+    model_tier: str = "isolation_forest"
 
     def to_dict(self) -> Dict[str, Any]:
         """Return a plain dict (database / API friendly)."""
@@ -194,7 +194,7 @@ FEATURE_NAMES: List[str] = [
 class TimelineEvent:
     """One entry in the chronological system health timeline."""
     timestamp: str
-    event_type: str          # "metric", "anomaly", "alert", "health", "trend", "root_cause"
+    event_type: str # "metric", "anomaly", "alert", "health", "trend", "root_cause"
     title: str
     description: str
     severity: str = "NORMAL"
@@ -225,7 +225,7 @@ class AnomalyDetectionEngine:
 
         engine = AnomalyDetectionEngine()
         engine.initialize_model()
-        engine.load_model()          # loads saved model if available
+        engine.load_model() # loads saved model if available
 
         # after enough data has been collected:
         engine.train_model(metrics_list)
@@ -237,18 +237,18 @@ class AnomalyDetectionEngine:
     """
 
     def __init__(self, model_config: Optional[ModelConfig] = None) -> None:
-        self.cfg             = model_config or ModelConfig()
-        self._model: Optional[IsolationForest]  = None
-        self._scaler: Optional[StandardScaler]  = None
-        self._is_trained: bool                  = False
-        self._training_lock: threading.Lock     = threading.Lock()
-        self._samples_since_retrain: int        = 0
-        self._total_predictions: int            = 0
+        self.cfg = model_config or ModelConfig()
+        self._model: Optional[IsolationForest] = None
+        self._scaler: Optional[StandardScaler] = None
+        self._is_trained: bool = False
+        self._training_lock: threading.Lock = threading.Lock()
+        self._samples_since_retrain: int = 0
+        self._total_predictions: int = 0
 
         # Rolling windows for feature computation (per-metric deques)
-        self._rolling_cpu:  deque = deque(maxlen=self.cfg.rolling_window)
-        self._rolling_ram:  deque = deque(maxlen=self.cfg.rolling_window)
-        self._rolling_net:  deque = deque(maxlen=self.cfg.rolling_window)
+        self._rolling_cpu: deque = deque(maxlen=self.cfg.rolling_window)
+        self._rolling_ram: deque = deque(maxlen=self.cfg.rolling_window)
+        self._rolling_net: deque = deque(maxlen=self.cfg.rolling_window)
 
         # ── NEW: state for dashboard intelligence layer ──
         self._timeline: deque = deque(maxlen=500)
@@ -288,7 +288,7 @@ class AnomalyDetectionEngine:
                     random_state=self.cfg.random_state,
                     n_jobs=-1,
                 )
-                self._scaler    = StandardScaler()
+                self._scaler = StandardScaler()
                 self._is_trained = False
 
             logger.info(
@@ -395,9 +395,9 @@ class AnomalyDetectionEngine:
                 if self._model is None or self._scaler is None:
                     self.initialize_model()
 
-                scaled = self._scaler.fit_transform(matrix)      # type: ignore[union-attr]
-                self._model.fit(scaled)                           # type: ignore[union-attr]
-                self._is_trained       = True
+                scaled = self._scaler.fit_transform(matrix) # type: ignore[union-attr]
+                self._model.fit(scaled) # type: ignore[union-attr]
+                self._is_trained = True
                 self._samples_since_retrain = 0
 
             # Compute baseline from training data
@@ -457,7 +457,7 @@ class AnomalyDetectionEngine:
         self._rolling_net.append(net)
 
         self._samples_since_retrain += 1
-        self._total_predictions     += 1
+        self._total_predictions += 1
 
         # Schedule background retrain if interval reached
         if (
@@ -492,12 +492,12 @@ class AnomalyDetectionEngine:
             feature_array = self._impute(feature_array)
 
             with self._training_lock:
-                scaled  = self._scaler.transform(feature_array)
+                scaled = self._scaler.transform(feature_array)
                 raw_score = float(self._model.score_samples(scaled)[0])
 
             is_anomaly, confidence = self._score_to_decision(raw_score)
             severity = self._compute_severity(raw_score, feature_array[0], metric)
-            reason   = self._build_reason(feature_array[0], metric, is_anomaly)
+            reason = self._build_reason(feature_array[0], metric, is_anomaly)
 
             prediction = AnomalyPrediction(
                 timestamp=timestamp,
@@ -550,24 +550,24 @@ class AnomalyDetectionEngine:
             return
 
         severity_colors = {
-            "LOW":      "⚠ ",
-            "MEDIUM":   "🔶",
-            "HIGH":     "🔴",
+            "LOW": "⚠ ",
+            "MEDIUM": "🔶",
+            "HIGH": "🔴",
             "CRITICAL": "🚨",
         }
         icon = severity_colors.get(prediction.severity, "⚠ ")
 
         alert = (
             f"\n{'=' * 60}\n"
-            f"  {icon}  [AI ALERT]  Potential anomaly detected.\n"
+            f" {icon} [AI ALERT] Potential anomaly detected.\n"
             f"{'=' * 60}\n"
-            f"  Confidence : {prediction.confidence:.1f}%\n"
-            f"  Severity   : {prediction.severity}\n"
-            f"  Score      : {prediction.anomaly_score:.4f}\n"
-            f"  Reason     :\n"
-            f"    {prediction.reason}\n"
-            f"  Timestamp  : {prediction.timestamp}\n"
-            f"  Model Tier : {prediction.model_tier}\n"
+            f" Confidence : {prediction.confidence:.1f}%\n"
+            f" Severity : {prediction.severity}\n"
+            f" Score : {prediction.anomaly_score:.4f}\n"
+            f" Reason :\n"
+            f" {prediction.reason}\n"
+            f" Timestamp : {prediction.timestamp}\n"
+            f" Model Tier : {prediction.model_tier}\n"
             f"{'=' * 60}\n"
         )
         print(alert)
@@ -593,7 +593,7 @@ class AnomalyDetectionEngine:
 
         try:
             os.makedirs(MODELS_DIR, exist_ok=True)
-            joblib.dump(self._model,  MODEL_PATH)
+            joblib.dump(self._model, MODEL_PATH)
             joblib.dump(self._scaler, SCALER_PATH)
             logger.info("Model saved to '%s'.", MODEL_PATH)
             return True
@@ -622,8 +622,8 @@ class AnomalyDetectionEngine:
 
         try:
             with self._training_lock:
-                self._model   = joblib.load(MODEL_PATH)
-                self._scaler  = joblib.load(SCALER_PATH)
+                self._model = joblib.load(MODEL_PATH)
+                self._scaler = joblib.load(SCALER_PATH)
                 self._is_trained = True
 
             logger.info("Loaded saved model from '%s'.", MODEL_PATH)
@@ -1226,20 +1226,20 @@ class AnomalyDetectionEngine:
         rolling_net: deque,
     ) -> List[float]:
         """Compute the full feature vector for one monitoring sample."""
-        cpu    = float(metric.get("cpu_percent",  0.0))
-        ram    = float(metric.get("ram_percent",  0.0))
-        disk   = float(metric.get("disk_percent", 0.0))
-        sent   = float(metric.get("net_sent_mb",  0.0))
-        recv   = float(metric.get("net_recv_mb",  0.0))
+        cpu = float(metric.get("cpu_percent", 0.0))
+        ram = float(metric.get("ram_percent", 0.0))
+        disk = float(metric.get("disk_percent", 0.0))
+        sent = float(metric.get("net_sent_mb", 0.0))
+        recv = float(metric.get("net_recv_mb", 0.0))
         net_tp = sent + recv
 
         cpu_ram_ratio = cpu / max(ram, 1.0)
 
-        proc_cpus  = [float(p.get("cpu_percent",    0.0)) for p in processes]
-        proc_mems  = [float(p.get("memory_percent", 0.0)) for p in processes]
-        avg_proc_cpu = float(np.mean(proc_cpus))  if proc_cpus else 0.0
-        avg_proc_mem = float(np.mean(proc_mems))  if proc_mems else 0.0
-        total_procs  = float(len(processes))
+        proc_cpus = [float(p.get("cpu_percent", 0.0)) for p in processes]
+        proc_mems = [float(p.get("memory_percent", 0.0)) for p in processes]
+        avg_proc_cpu = float(np.mean(proc_cpus)) if proc_cpus else 0.0
+        avg_proc_mem = float(np.mean(proc_mems)) if proc_mems else 0.0
+        total_procs = float(len(processes))
 
         rolling_cpu.append(cpu)
         rolling_ram.append(ram)
@@ -1260,7 +1260,7 @@ class AnomalyDetectionEngine:
         """Replace NaN and Inf values with column medians."""
         matrix = np.where(np.isinf(matrix), np.nan, matrix)
         col_medians = np.nanmedian(matrix, axis=0)
-        nan_mask    = np.isnan(matrix)
+        nan_mask = np.isnan(matrix)
         if nan_mask.any():
             matrix[nan_mask] = np.take(col_medians, np.where(nan_mask)[1])
         return matrix
@@ -1379,8 +1379,8 @@ class AnomalyDetectionEngine:
         def _retrain() -> None:
             logger.info("Background retrain triggered after %d new samples.", self.cfg.retrain_interval)
             with config.data_lock:
-                metrics_snap  = list(config.metrics_data)
-                process_snap  = list(config.process_data)
+                metrics_snap = list(config.metrics_data)
+                process_snap = list(config.process_data)
             self.train_model(metrics_snap, process_snap)
 
         t = threading.Thread(target=_retrain, daemon=True, name="AIRetrainThread")
