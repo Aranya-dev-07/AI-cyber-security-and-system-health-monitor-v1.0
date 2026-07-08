@@ -83,17 +83,15 @@ app.add_middleware(
 
 
 # ---------------------------------------------------------------------------
-# Pydantic response models
+# Pydantic response models — Original
 # ---------------------------------------------------------------------------
 class HealthResponse(BaseModel):
     """Response model for the liveness check endpoint."""
-
     status: str = Field(..., description="Service health status.", examples=["healthy"])
 
 
 class MetricResponse(BaseModel):
     """Response model for a single system metric snapshot."""
-
     timestamp: str = Field(..., description="ISO-8601 timestamp of the snapshot.")
     cpu_percent: float = Field(..., description="CPU utilisation, in percent.")
     ram_percent: float = Field(..., description="RAM utilisation, in percent.")
@@ -104,7 +102,6 @@ class MetricResponse(BaseModel):
 
 class ProcessResponse(BaseModel):
     """Response model for a single process snapshot entry."""
-
     timestamp: str = Field(..., description="ISO-8601 timestamp of the snapshot.")
     pid: int = Field(..., description="Process ID.")
     name: str = Field(..., description="Process name.")
@@ -115,7 +112,6 @@ class ProcessResponse(BaseModel):
 
 class RunHistoryResponse(BaseModel):
     """Response model for a single historical monitoring run."""
-
     id: int = Field(..., description="Unique run identifier.")
     start_time: str = Field(..., description="ISO-8601 timestamp the run started.")
     end_time: Optional[str] = Field(None, description="ISO-8601 timestamp the run ended.")
@@ -125,7 +121,6 @@ class RunHistoryResponse(BaseModel):
 
 class RunSummaryResponse(BaseModel):
     """Response model for the current/most recent run summary."""
-
     run_id: int = Field(..., description="Identifier of the run this summary covers.")
     start_time: str = Field(..., description="ISO-8601 timestamp the run started.")
     end_time: str = Field(..., description="ISO-8601 timestamp the run ended (or 'now').")
@@ -138,7 +133,6 @@ class RunSummaryResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     """Standard error response shape for documented error cases."""
-
     detail: str = Field(..., description="Human-readable error message.")
 
 
@@ -147,12 +141,7 @@ class ErrorResponse(BaseModel):
 # ---------------------------------------------------------------------------
 @app.on_event("startup")
 async def on_startup() -> None:
-    """Initialize the database schema when the API starts.
-
-    Calling this here (in addition to ``main.py``) makes ``api.py`` safe
-    to run standalone (e.g. via ``uvicorn api:app``) without depending on
-    ``main.py`` having run first.
-    """
+    """Initialize the database schema when the API starts."""
     try:
         database.initialize_database()
         logger.info("API startup complete: database initialized.")
@@ -161,7 +150,7 @@ async def on_startup() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Endpoints
+# Endpoints — Original
 # ---------------------------------------------------------------------------
 @app.get(
     "/health",
@@ -170,11 +159,7 @@ async def on_startup() -> None:
     summary="Liveness check",
 )
 async def get_health() -> HealthResponse:
-    """Return a simple liveness indicator for the API service.
-
-    Returns:
-        ``{"status": "healthy"}`` if the service is up and responding.
-    """
+    """Return a simple liveness indicator for the API service."""
     return HealthResponse(status="healthy")
 
 
@@ -186,19 +171,7 @@ async def get_health() -> HealthResponse:
     responses={404: {"model": ErrorResponse, "description": "No metrics collected yet."}},
 )
 async def get_metrics() -> MetricResponse:
-    """Return the most recently collected system metric snapshot.
-
-    Reads directly from the shared in-memory ``config.metrics_data`` list
-    (not the database) so the response reflects the absolute latest
-    collection cycle with no query latency.
-
-    Returns:
-        The most recent :class:`MetricResponse`.
-
-    Raises:
-        HTTPException: 404 if no metrics have been collected yet (i.e. the
-            monitoring loop has not started or has not completed a cycle).
-    """
+    """Return the most recently collected system metric snapshot."""
     try:
         with config.data_lock:
             if not config.metrics_data:
@@ -207,9 +180,7 @@ async def get_metrics() -> MetricResponse:
                     detail="No metrics data available yet. Start monitoring first.",
                 )
             latest = config.metrics_data[-1]
-
         return MetricResponse(**latest)
-
     except HTTPException:
         raise
     except Exception:
@@ -228,19 +199,7 @@ async def get_metrics() -> MetricResponse:
     responses={404: {"model": ErrorResponse, "description": "No process data collected yet."}},
 )
 async def get_processes() -> List[ProcessResponse]:
-    """Return the most recently collected top-process snapshot.
-
-    Reads directly from the shared in-memory ``config.process_data`` list
-    (not the database) so the response reflects the absolute latest
-    collection cycle with no query latency.
-
-    Returns:
-        A list of :class:`ProcessResponse`, one per top process from the
-        most recent collection cycle (sorted by CPU usage, descending).
-
-    Raises:
-        HTTPException: 404 if no process data has been collected yet.
-    """
+    """Return the most recently collected top-process snapshot."""
     try:
         with config.data_lock:
             if not config.process_data:
@@ -249,10 +208,8 @@ async def get_processes() -> List[ProcessResponse]:
                     detail="No process data available yet. Start monitoring first.",
                 )
             latest_snapshot = config.process_data[-1]
-
         processes = latest_snapshot.get("processes", [])
         return [ProcessResponse(**proc) for proc in processes]
-
     except HTTPException:
         raise
     except Exception:
@@ -271,18 +228,7 @@ async def get_processes() -> List[ProcessResponse]:
     responses={404: {"model": ErrorResponse, "description": "No metrics collected yet."}},
 )
 async def get_metrics_history() -> List[MetricResponse]:
-    """Return all metric snapshots collected since monitoring started.
-
-    Reads directly from the shared in-memory ``config.metrics_data`` list.
-    Intended for the React dashboard's line charts, which need the full
-    history rather than just the most recent snapshot.
-
-    Returns:
-        A list of :class:`MetricResponse`, oldest first.
-
-    Raises:
-        HTTPException: 404 if no metrics have been collected yet.
-    """
+    """Return all metric snapshots collected since monitoring started."""
     try:
         with config.data_lock:
             if not config.metrics_data:
@@ -291,9 +237,7 @@ async def get_metrics_history() -> List[MetricResponse]:
                     detail="No metrics data available yet. Start monitoring first.",
                 )
             snapshot = list(config.metrics_data)
-
         return [MetricResponse(**m) for m in snapshot]
-
     except HTTPException:
         raise
     except Exception:
@@ -311,20 +255,10 @@ async def get_metrics_history() -> List[MetricResponse]:
     summary="Get test run history",
 )
 async def get_runs(limit: int = 50) -> List[RunHistoryResponse]:
-    """Return historical monitoring run records from the database.
-
-    Args:
-        limit: Maximum number of runs to return, most recent first.
-            Defaults to ``50``.
-
-    Returns:
-        A list of :class:`RunHistoryResponse`, ordered from most recent to
-        least recent. Returns an empty list if no runs have been recorded.
-    """
+    """Return historical monitoring run records from the database."""
     try:
         runs = database.get_run_history(limit=limit)
         return [RunHistoryResponse(**run) for run in runs]
-
     except Exception:
         logger.exception("Failed to retrieve run history.")
         raise HTTPException(
@@ -341,31 +275,15 @@ async def get_runs(limit: int = 50) -> List[RunHistoryResponse]:
     responses={404: {"model": ErrorResponse, "description": "No run data available yet."}},
 )
 async def get_summary() -> RunSummaryResponse:
-    """Return aggregate statistics for the current (or most recent) run.
-
-    Computed live via ``config.generate_run_summary()`` against the
-    current in-memory ``metrics_data``, ``run_start_time``,
-    ``run_end_time``, and ``alert_count`` - there is no dedicated database
-    table for summaries, only the CSV report written at the end of a run.
-
-    Returns:
-        The computed :class:`RunSummaryResponse`.
-
-    Raises:
-        HTTPException: 404 if no metrics have been collected yet, meaning
-            no summary can be computed.
-    """
+    """Return aggregate statistics for the current (or most recent) run."""
     try:
         summary = config.generate_run_summary()
-
         if not summary:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No run summary available yet. Start monitoring first.",
             )
-
         return RunSummaryResponse(**summary)
-
     except HTTPException:
         raise
     except Exception:
@@ -377,9 +295,9 @@ async def get_summary() -> RunSummaryResponse:
 
 
 # ---------------------------------------------------------------------------
-# AI anomaly detection endpoints
+# AI anomaly detection endpoints — Original + New Dashboard endpoints
 # ---------------------------------------------------------------------------
-import ai_engine as _ai_engine  # noqa: E402 — imported after app creation to avoid circular import
+import ai_engine as _ai_engine  # noqa: E402
 
 
 class AnomalyResponse(BaseModel):
@@ -416,17 +334,7 @@ class AIStatisticsResponse(BaseModel):
     responses={404: {"model": ErrorResponse, "description": "No anomalies recorded yet."}},
 )
 async def get_ai_latest(limit: int = 5) -> List[AnomalyResponse]:
-    """Return the most recently detected anomalies from the database.
-
-    Args:
-        limit: Maximum number of records to return (default 5).
-
-    Returns:
-        A list of :class:`AnomalyResponse`, most recent first.
-
-    Raises:
-        HTTPException: 404 if no anomalies have been recorded yet.
-    """
+    """Return the most recently detected anomalies from the database."""
     try:
         rows = database.get_latest_ai_prediction(limit=limit)
         if not rows:
@@ -452,15 +360,7 @@ async def get_ai_latest(limit: int = 5) -> List[AnomalyResponse]:
     summary="Get full AI anomaly detection history",
 )
 async def get_ai_history(limit: int = 100) -> List[AnomalyResponse]:
-    """Return historical anomaly detections from the database.
-
-    Args:
-        limit: Maximum number of records to return (default 100).
-
-    Returns:
-        A list of :class:`AnomalyResponse`, most recent first.
-        Returns an empty list if no anomalies have been recorded.
-    """
+    """Return historical anomaly detections from the database."""
     try:
         rows = database.get_ai_prediction_history(limit=limit)
         return [AnomalyResponse(**row) for row in rows]
@@ -479,15 +379,7 @@ async def get_ai_history(limit: int = 100) -> List[AnomalyResponse]:
     summary="Get aggregate AI anomaly detection statistics",
 )
 async def get_ai_statistics() -> AIStatisticsResponse:
-    """Return aggregate statistics across all stored anomaly predictions.
-
-    Combines database aggregate queries with live engine state (trained
-    status, total predictions this session).
-
-    Returns:
-        An :class:`AIStatisticsResponse` with counts, averages, and
-        engine status.
-    """
+    """Return aggregate statistics across all stored anomaly predictions."""
     try:
         stats = database.get_ai_statistics()
         return AIStatisticsResponse(
@@ -506,4 +398,149 @@ async def get_ai_statistics() -> AIStatisticsResponse:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while retrieving AI statistics.",
+        )
+
+
+# ---------------------------------------------------------------------------
+# NEW: AI Dashboard Intelligence Endpoints
+# ---------------------------------------------------------------------------
+@app.get(
+    "/ai/dashboard",
+    tags=["AI Dashboard"],
+    summary="Get complete AI dashboard data bundle",
+)
+async def get_ai_dashboard() -> Dict[str, Any]:
+    """Return all AI dashboard data in a single response.
+
+    This is the primary endpoint consumed by the dashboard's AI tab.
+    Returns health score, root causes, trends, anomalies,
+    recommendations, timeline, insights, and baseline comparison
+    in one HTTP round-trip.
+    """
+    try:
+        return _ai_engine.engine.get_dashboard_bundle()
+    except Exception:
+        logger.exception("Failed to generate AI dashboard bundle.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while generating AI dashboard data.",
+        )
+
+
+@app.get(
+    "/ai/health",
+    tags=["AI Dashboard"],
+    summary="Get AI health score and status",
+)
+async def get_ai_health() -> Dict[str, Any]:
+    """Return the current AI-computed system health score."""
+    try:
+        return _ai_engine.engine.compute_health_score()
+    except Exception:
+        logger.exception("Failed to retrieve AI health score.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving AI health.",
+        )
+
+
+@app.get(
+    "/ai/root-cause",
+    tags=["AI Dashboard"],
+    summary="Get AI root cause analysis",
+)
+async def get_ai_root_cause() -> List[Dict[str, Any]]:
+    """Return root cause analysis for active anomalies."""
+    try:
+        return _ai_engine.engine.analyze_root_cause()
+    except Exception:
+        logger.exception("Failed to retrieve AI root cause analysis.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while analyzing root cause.",
+        )
+
+
+@app.get(
+    "/ai/trends",
+    tags=["AI Dashboard"],
+    summary="Get AI trend analysis",
+)
+async def get_ai_trends() -> List[Dict[str, Any]]:
+    """Return detected trends across all monitored metrics."""
+    try:
+        return _ai_engine.engine.analyze_trends()
+    except Exception:
+        logger.exception("Failed to retrieve AI trends.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while analyzing trends.",
+        )
+
+
+@app.get(
+    "/ai/anomalies",
+    tags=["AI Dashboard"],
+    summary="Get active AI anomalies",
+)
+async def get_ai_anomalies() -> List[Dict[str, Any]]:
+    """Return all currently active anomalies."""
+    try:
+        return _ai_engine.engine.get_active_anomalies()
+    except Exception:
+        logger.exception("Failed to retrieve active anomalies.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving anomalies.",
+        )
+
+
+@app.get(
+    "/ai/recommendations",
+    tags=["AI Dashboard"],
+    summary="Get AI-generated recommendations",
+)
+async def get_ai_recommendations() -> List[Dict[str, Any]]:
+    """Return prioritized actionable recommendations."""
+    try:
+        return _ai_engine.engine.generate_recommendations()
+    except Exception:
+        logger.exception("Failed to generate AI recommendations.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while generating recommendations.",
+        )
+
+
+@app.get(
+    "/ai/timeline",
+    tags=["AI Dashboard"],
+    summary="Get system health timeline",
+)
+async def get_ai_timeline(limit: int = 50) -> List[Dict[str, Any]]:
+    """Return chronological system health events."""
+    try:
+        return _ai_engine.engine.get_timeline(limit=limit)
+    except Exception:
+        logger.exception("Failed to retrieve AI timeline.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving timeline.",
+        )
+
+
+@app.get(
+    "/ai/insights",
+    tags=["AI Dashboard"],
+    summary="Get AI-generated system insights",
+)
+async def get_ai_insights() -> Dict[str, Any]:
+    """Return natural-language AI summary of current system state."""
+    try:
+        return _ai_engine.engine.generate_insights()
+    except Exception:
+        logger.exception("Failed to generate AI insights.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while generating insights.",
         )
