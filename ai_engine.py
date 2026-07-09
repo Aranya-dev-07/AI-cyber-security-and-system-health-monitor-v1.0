@@ -279,6 +279,27 @@ class AnomalyDetectionEngine:
         # fully explainable score computed in parallel.
         self._health_score_engine: "HealthScoreEngine" = HealthScoreEngine(self)
 
+        # ── NEW: Explainable AI Trend Analysis Engine ──
+        # Independent module, recalculated every monitoring cycle. Does
+        # not read or modify the pre-existing analyze_trends()/_detect_trend
+        # logic — a separate, richer implementation with duration-in-minutes,
+        # spike-vs-long-term-trend classification, and historical comparison.
+        self._trend_engine: "TrendAnalysisEngine" = TrendAnalysisEngine(self)
+
+        # ── NEW: Explainable AI Predictive Alert Engine ──
+        # Independent module, recalculated every monitoring cycle. Only
+        # consumes this cycle's TrendAnalysisEngine output — never
+        # recomputes trends or reads raw metrics for its own regression.
+        self._predictive_engine: "PredictiveAlertEngine" = PredictiveAlertEngine(self)
+
+        # ── NEW: Explainable AI Recommendation Engine ──
+        # Independent module, recalculated every monitoring cycle. Does
+        # not read or modify the pre-existing generate_recommendations()
+        # method — a separate implementation that synthesizes across the
+        # current prediction, Root Cause Analysis, Trend Analysis, and
+        # Health Score outputs.
+        self._recommendation_engine: "RecommendationEngine" = RecommendationEngine(self)
+
     # ------------------------------------------------------------------
     # Public API — original methods
     # ------------------------------------------------------------------
@@ -501,6 +522,9 @@ class AnomalyDetectionEngine:
             except Exception:
                 logger.exception("Health Score computation failed (untrained-model branch).")
 
+            # ── NEW: Trend Analysis / Predictive Alerts / Recommendations ──
+            self._run_extended_ai_pipeline(metric, processes or [], prediction)
+
             return prediction
 
         try:
@@ -540,6 +564,12 @@ class AnomalyDetectionEngine:
 
             if is_anomaly:
                 self._register_anomaly(prediction, metric, processes)
+
+            # ── NEW: Trend Analysis / Predictive Alerts / Recommendations ──
+            # Placed after _register_anomaly so this cycle's Root Cause
+            # Analysis (if any) is already available to the Recommendation
+            # and Predictive Alert engines.
+            self._run_extended_ai_pipeline(metric, processes or [], prediction)
 
             # Add metric event to timeline
             self._add_timeline_event(
@@ -861,6 +891,55 @@ class AnomalyDetectionEngine:
             limit: Maximum number of results to return.
         """
         return self._health_score_engine.get_history(limit=limit)
+
+    # ------------------------------------------------------------------
+    # NEW: Explainable AI Trend Analysis — public accessors
+    # ------------------------------------------------------------------
+    def get_latest_trend_analysis(self) -> List[Dict[str, Any]]:
+        """Return the most recent Trend Analysis result set (one entry per metric).
+
+        Produced by the independent :class:`TrendAnalysisEngine`, recomputed
+        every monitoring cycle. Does not read the pre-existing
+        ``analyze_trends()``/``_detect_trend`` logic.
+        """
+        return self._trend_engine.get_latest()
+
+    def get_trend_analysis_history(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """Return past Trend Analysis result bundles, most recent first."""
+        return self._trend_engine.get_history(limit=limit)
+
+    # ------------------------------------------------------------------
+    # NEW: Explainable AI Predictive Alerts — public accessors
+    # ------------------------------------------------------------------
+    def get_latest_predictive_alerts(self) -> List[Dict[str, Any]]:
+        """Return the most recently forecast predictive alerts (may be empty).
+
+        Produced by the independent :class:`PredictiveAlertEngine`, which
+        only extrapolates off this cycle's Trend Analysis output — it
+        performs no anomaly detection or trend computation of its own.
+        """
+        return self._predictive_engine.get_latest()
+
+    def get_predictive_alerts_history(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """Return past predictive alert bundles, most recent first."""
+        return self._predictive_engine.get_history(limit=limit)
+
+    # ------------------------------------------------------------------
+    # NEW: Explainable AI Recommendations — public accessors
+    # ------------------------------------------------------------------
+    def get_latest_smart_recommendations(self) -> List[Dict[str, Any]]:
+        """Return the most recent Recommendation Engine output.
+
+        Produced by the independent :class:`RecommendationEngine`, which
+        synthesizes across this cycle's prediction, Root Cause Analysis,
+        Trend Analysis, and Health Score — without duplicating the
+        pre-existing ``generate_recommendations()`` method.
+        """
+        return self._recommendation_engine.get_latest()
+
+    def get_smart_recommendations_history(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """Return past recommendation bundles, most recent first."""
+        return self._recommendation_engine.get_history(limit=limit)
 
     def generate_recommendations(self) -> List[Dict[str, Any]]:
         """Generate actionable recommendations based on current state.
@@ -1460,6 +1539,43 @@ class AnomalyDetectionEngine:
 
         t = threading.Thread(target=_retrain, daemon=True, name="AIRetrainThread")
         t.start()
+
+    # ------------------------------------------------------------------
+    # NEW: shared pipeline helper for the three newest explainable engines
+    # ------------------------------------------------------------------
+    def _run_extended_ai_pipeline(
+        self,
+        metric: Dict[str, Any],
+        processes: List[Dict[str, Any]],
+        prediction: AnomalyPrediction,
+    ) -> None:
+        """Run Trend Analysis, Predictive Alerts, and Recommendations, in order.
+
+        Called once per monitoring cycle from both branches of
+        ``predict_anomaly`` (trained and not-yet-trained), after health
+        score and (if applicable) Root Cause Analysis have already run
+        this cycle. Each stage is independently guarded so a failure in
+        one never blocks the others or the caller.
+
+        Pipeline order: Trend Analysis -> Predictive Alerts (consumes
+        trend output) -> Recommendations (consumes prediction, RCA,
+        trend output, and health score).
+        """
+        trend_results: List[Dict[str, Any]] = []
+        try:
+            trend_results = self._trend_engine.analyze()
+        except Exception:
+            logger.exception("Trend Analysis failed for cycle at %s.", prediction.timestamp)
+
+        try:
+            self._predictive_engine.forecast(trend_results, metric)
+        except Exception:
+            logger.exception("Predictive Alert forecasting failed for cycle at %s.", prediction.timestamp)
+
+        try:
+            self._recommendation_engine.generate(prediction, metric, processes, trend_results)
+        except Exception:
+            logger.exception("Recommendation generation failed for cycle at %s.", prediction.timestamp)
 
     # ------------------------------------------------------------------
     # Private helpers — NEW dashboard intelligence
@@ -2557,6 +2673,682 @@ class HealthScoreEngine:
 
 
 # ---------------------------------------------------------------------------
+# NEW: Explainable AI Trend Analysis Engine
+# ---------------------------------------------------------------------------
+class TrendAnalysisEngine:
+    """Explainable AI Trend Analysis Engine.
+
+    Independent module, recalculated every monitoring cycle. Analyzes the
+    shared ``config.metrics_data`` history (never re-collects metrics) to
+    distinguish sustained long-term behavioural trends from temporary
+    spikes, for CPU, RAM, Disk, and Network.
+
+    This is a separate implementation from the pre-existing
+    ``AnomalyDetectionEngine.analyze_trends()`` / ``_detect_trend()``
+    (which remain untouched and continue to back existing
+    recommendations/health penalties) — this engine adds duration in
+    minutes, explicit spike-vs-trend classification, historical baseline
+    comparison, and full-sentence explanations per your spec.
+
+    Attributes:
+        _parent: Read-only back-reference to the owning
+            ``AnomalyDetectionEngine``, used only to read its learned
+            baseline. No state is written back to it.
+        _history: Bounded history of past trend-result bundles.
+        _latest: The most recently computed list of trend results.
+    """
+
+    _SHORT_WINDOW = 12   # ~1 minute at the default 5s monitor interval
+    _LONG_WINDOW = 120   # ~10 minutes at the default 5s monitor interval
+
+    _METRIC_DEFS: List[Tuple[str, str]] = [
+        ("cpu_percent", "CPU Usage"),
+        ("ram_percent", "RAM Usage"),
+        ("disk_percent", "Disk Usage"),
+        ("net_throughput_mb", "Network Throughput"),
+    ]
+
+    def __init__(self, parent_engine: "AnomalyDetectionEngine") -> None:
+        self._parent: "AnomalyDetectionEngine" = parent_engine
+        self._history: deque = deque(maxlen=200)
+        self._latest: List[Dict[str, Any]] = []
+        self._lock: threading.Lock = threading.Lock()
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+    def analyze(self) -> List[Dict[str, Any]]:
+        """Analyze current trend state for every tracked metric.
+
+        Returns:
+            A list of trend-result dicts, one per metric (``metric``,
+            ``metric_key``, ``trend_name``, ``classification``,
+            ``duration_minutes``, ``rate_of_change_per_min``,
+            ``confidence``, ``severity``, ``historical_comparison``,
+            ``explanation``, ``current_value``, ``timestamp``).
+        """
+        with config.data_lock:
+            snapshot = list(config.metrics_data)
+
+        timestamp = datetime.now().isoformat()
+        results = [
+            self._analyze_single(key, display, self._extract_values(snapshot, key), timestamp)
+            for key, display in self._METRIC_DEFS
+        ]
+
+        with self._lock:
+            self._latest = results
+            self._history.append({"timestamp": timestamp, "trends": results})
+
+        return results
+
+    def get_latest(self) -> List[Dict[str, Any]]:
+        """Return the most recently computed trend results."""
+        with self._lock:
+            return list(self._latest)
+
+    def get_history(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """Return past trend-result bundles, most recent first."""
+        with self._lock:
+            items = list(self._history)
+        items.reverse()
+        return items[:limit]
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _extract_values(snapshot: List[Dict[str, Any]], key: str) -> List[float]:
+        if key == "net_throughput_mb":
+            return [
+                float(m.get("net_sent_mb", 0.0)) + float(m.get("net_recv_mb", 0.0))
+                for m in snapshot
+            ]
+        return [float(m.get(key, 0.0)) for m in snapshot]
+
+    def _analyze_single(
+        self, key: str, display: str, values: List[float], timestamp: str
+    ) -> Dict[str, Any]:
+        n = len(values)
+        if n < 3:
+            return {
+                "metric": display, "metric_key": key,
+                "trend_name": "Insufficient Data", "classification": "insufficient_data",
+                "duration_minutes": 0.0, "rate_of_change_per_min": 0.0,
+                "confidence": 0.0, "severity": "NORMAL",
+                "historical_comparison": "Not enough data collected yet.",
+                "explanation": f"Not enough {display.lower()} samples have been collected to analyze a trend.",
+                "current_value": round(values[-1], 2) if values else 0.0,
+                "timestamp": timestamp,
+            }
+
+        short = values[-self._SHORT_WINDOW:] if n >= self._SHORT_WINDOW else values
+        long_ = values[-self._LONG_WINDOW:] if n >= self._LONG_WINDOW else values
+
+        short_slope, short_conf = self._linreg_slope(short)
+        long_slope, long_conf = self._linreg_slope(long_)
+
+        interval_min = max(config.MONITOR_INTERVAL / 60.0, 1e-6)
+        short_rate_per_min = short_slope / interval_min
+        long_rate_per_min = long_slope / interval_min
+
+        std_short = float(np.std(short))
+        mean_short = float(np.mean(short)) or 1.0
+        volatile = std_short > mean_short * 0.3 and mean_short > 5.0
+
+        classification, rate_used, confidence = self._classify(
+            short_rate_per_min, long_rate_per_min, short_conf, long_conf, volatile
+        )
+
+        duration_minutes = (len(long_) * config.MONITOR_INTERVAL) / 60.0
+        current = values[-1]
+
+        baseline = self._parent._baseline.get(key, 0.0)
+        if baseline > 0:
+            dev_pct = ((current - baseline) / baseline) * 100.0
+            historical_comparison = (
+                f"{display} is currently {abs(dev_pct):.0f}% "
+                f"{'above' if dev_pct >= 0 else 'below'} its learned baseline."
+            )
+        else:
+            historical_comparison = f"{display} baseline has not been learned yet."
+
+        trend_name, severity, explanation = self._build_trend_narrative(
+            key, display, classification, rate_used, duration_minutes, current, historical_comparison,
+        )
+
+        return {
+            "metric": display, "metric_key": key,
+            "trend_name": trend_name, "classification": classification,
+            "duration_minutes": round(duration_minutes, 1),
+            "rate_of_change_per_min": round(rate_used, 3),
+            "confidence": round(confidence, 1), "severity": severity,
+            "historical_comparison": historical_comparison,
+            "explanation": explanation,
+            "current_value": round(current, 2),
+            "timestamp": timestamp,
+        }
+
+    @staticmethod
+    def _linreg_slope(values: List[float]) -> Tuple[float, float]:
+        """Return (slope-per-sample, confidence%) via simple linear regression."""
+        n = len(values)
+        if n < 2:
+            return 0.0, 0.0
+        arr = np.array(values, dtype=float)
+        x = np.arange(n, dtype=float)
+        slope = float(np.polyfit(x, arr, 1)[0])
+        if np.std(arr) > 0:
+            corr = float(np.corrcoef(x, arr)[0, 1])
+            confidence = min(99.0, abs(corr) * 100.0)
+        else:
+            confidence = 20.0
+        return slope, confidence
+
+    @staticmethod
+    def _classify(
+        short_rate: float, long_rate: float, short_conf: float, long_conf: float, volatile: bool,
+    ) -> Tuple[str, float, float]:
+        """Return (classification, rate_used, confidence)."""
+        if volatile:
+            return "temporary_spike", short_rate, max(short_conf, 40.0)
+        if abs(long_rate) < 0.05:
+            return "stable", long_rate, long_conf
+        if abs(short_rate) > abs(long_rate) * 2.5 and abs(short_rate) > 1.0:
+            return "temporary_spike", short_rate, short_conf
+        return "long_term_trend", long_rate, long_conf
+
+    @staticmethod
+    def _build_trend_narrative(
+        key: str, display: str, classification: str, rate: float,
+        duration_min: float, current: float, historical_comparison: str,
+    ) -> Tuple[str, str, str]:
+        """Return (trend_name, severity, explanation)."""
+        direction = "increasing" if rate > 0 else "decreasing" if rate < 0 else "stable"
+
+        if classification == "stable":
+            return (
+                f"{display} Stable", "NORMAL",
+                f"{display} has remained stable at approximately {current:.1f}% with no significant trend.",
+            )
+
+        if classification == "temporary_spike":
+            return (
+                f"{display}: Repeated Spikes", "MEDIUM",
+                (
+                    f"{display} is showing volatile, spike-like behavior rather than a sustained "
+                    f"trend. Current value is {current:.1f}%. {historical_comparison}"
+                ),
+            )
+
+        # long_term_trend
+        severity = "LOW"
+        if abs(rate) > 2.0:
+            severity = "HIGH"
+        elif abs(rate) > 0.5:
+            severity = "MEDIUM"
+
+        special_name: Optional[str] = None
+        if key == "ram_percent" and rate > 0.3:
+            special_name = "Possible Memory Leak"
+            if severity == "MEDIUM":
+                severity = "HIGH"
+        elif key == "disk_percent" and rate > 0.2 and current > 70.0:
+            special_name = "Possible Resource Exhaustion"
+
+        trend_name = special_name or f"{display} Steadily {'Increasing' if direction == 'increasing' else 'Decreasing'}"
+
+        explanation = (
+            f"{display} has been {direction} at approximately {abs(rate):.2f}%/min over the last "
+            f"~{duration_min:.0f} minute(s), currently at {current:.1f}%. {historical_comparison}"
+        )
+        if special_name == "Possible Memory Leak":
+            explanation += " This continuous, non-recovering growth pattern is consistent with a memory leak."
+        elif special_name == "Possible Resource Exhaustion":
+            explanation += " At this rate, available disk capacity may be significantly reduced if the trend continues."
+
+        return trend_name, severity, explanation
+
+
+# ---------------------------------------------------------------------------
+# NEW: Explainable AI Predictive Alert Engine
+# ---------------------------------------------------------------------------
+class PredictiveAlertEngine:
+    """Explainable AI Predictive Alert Engine.
+
+    Independent module, recalculated every monitoring cycle. Forecasts
+    likely future threshold breaches by linearly extrapolating each
+    metric's already-computed :class:`TrendAnalysisEngine` rate of
+    change — it performs no trend computation or anomaly detection of
+    its own, and only forecasts off metrics already classified as a
+    sustained ``long_term_trend`` (never off spikes or stable readings).
+
+    Attributes:
+        _parent: Read-only back-reference to the owning
+            ``AnomalyDetectionEngine``, used only to read the latest
+            Root Cause Analysis result for root-cause-likelihood context.
+        _history: Bounded history of past forecast bundles.
+        _latest: The most recently computed list of predictive alerts
+            (may be empty if no metric is currently trending toward its
+            threshold).
+    """
+
+    _HORIZONS_MIN: List[int] = [5, 15, 30, 60]
+
+    # metric_key -> (display label, callable returning current threshold)
+    _METRIC_THRESHOLDS: Dict[str, Tuple[str, Any]] = {
+        "cpu_percent":        ("CPU",     lambda: config.CPU_THRESHOLD),
+        "ram_percent":        ("RAM",     lambda: config.RAM_THRESHOLD),
+        "disk_percent":       ("Disk",    lambda: 90.0),
+        "net_throughput_mb":  ("Network", lambda: config.NETWORK_THRESHOLD),
+    }
+
+    def __init__(self, parent_engine: "AnomalyDetectionEngine") -> None:
+        self._parent: "AnomalyDetectionEngine" = parent_engine
+        self._history: deque = deque(maxlen=200)
+        self._latest: List[Dict[str, Any]] = []
+        self._lock: threading.Lock = threading.Lock()
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+    def forecast(
+        self, trend_results: List[Dict[str, Any]], metric: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        """Forecast likely future threshold breaches from current trends.
+
+        Args:
+            trend_results: This cycle's output from
+                :meth:`TrendAnalysisEngine.analyze`. Consumed only —
+                never recomputed.
+            metric: The raw system metric dict for this cycle (used only
+                to timestamp/contextualize the forecast).
+
+        Returns:
+            A list of predictive-alert dicts (may be empty). Each has
+            ``timestamp``, ``predicted_issue``, ``metric``,
+            ``horizon_minutes``, ``probability``, ``confidence``,
+            ``predicted_severity``, ``estimated_time_until``,
+            ``root_cause_likelihood``, ``explanation``,
+            ``recommended_action``.
+        """
+        timestamp = datetime.now().isoformat()
+        trend_by_key = {t["metric_key"]: t for t in trend_results}
+        rca_latest = self._parent._rca_engine.get_latest()
+
+        alerts: List[Dict[str, Any]] = []
+
+        for key, (label, threshold_fn) in self._METRIC_THRESHOLDS.items():
+            trend = trend_by_key.get(key)
+            if not trend or trend.get("classification") != "long_term_trend":
+                continue  # only forecast off sustained trends, never spikes/stable/insufficient
+
+            rate_per_min = trend.get("rate_of_change_per_min", 0.0)
+            if rate_per_min <= 0:
+                continue  # only forecast worsening trends
+
+            current_value = trend.get("current_value", 0.0)
+            threshold = threshold_fn()
+
+            if current_value >= threshold:
+                continue  # already breached — that's an active anomaly, not a prediction
+
+            alert = self._first_breaching_horizon(
+                key, label, current_value, threshold, rate_per_min,
+                trend.get("confidence", 0.0), rca_latest, timestamp,
+            )
+            if alert:
+                alerts.append(alert)
+
+        with self._lock:
+            self._latest = alerts
+            self._history.append({"timestamp": timestamp, "alerts": alerts})
+
+        return alerts
+
+    def get_latest(self) -> List[Dict[str, Any]]:
+        """Return the most recently forecast predictive alerts (may be empty)."""
+        with self._lock:
+            return list(self._latest)
+
+    def get_history(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """Return past predictive-alert bundles, most recent first."""
+        with self._lock:
+            items = list(self._history)
+        items.reverse()
+        return items[:limit]
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+    def _first_breaching_horizon(
+        self,
+        key: str, label: str, current_value: float, threshold: float, rate_per_min: float,
+        confidence: float, rca_latest: Optional[Dict[str, Any]], timestamp: str,
+    ) -> Optional[Dict[str, Any]]:
+        """Return a predictive-alert dict for the earliest horizon that
+        projects a threshold breach, or ``None`` if no configured horizon
+        (5/15/30/60 min) projects one.
+        """
+        for horizon in self._HORIZONS_MIN:
+            projected = current_value + rate_per_min * horizon
+            if projected < threshold:
+                continue
+
+            minutes_to_breach = (threshold - current_value) / rate_per_min
+            probability = self._estimate_probability(confidence, projected, threshold)
+            severity = self._severity_for(probability, horizon)
+            root_cause_likelihood = self._root_cause_likelihood(key, rca_latest)
+
+            explanation = (
+                f"{label} usage is trending upward at {rate_per_min:.2f}%/min based on the current "
+                f"growth trend. It is likely to exceed {threshold:.0f}% within the next {horizon} "
+                f"minute(s) (projected ~{projected:.0f}%)."
+            )
+
+            return {
+                "timestamp": timestamp,
+                "predicted_issue": self._issue_name(key),
+                "metric": label,
+                "horizon_minutes": horizon,
+                "probability": round(probability, 1),
+                "confidence": round(confidence, 1),
+                "predicted_severity": severity,
+                "estimated_time_until": f"~{minutes_to_breach:.0f} minute(s)",
+                "root_cause_likelihood": root_cause_likelihood,
+                "explanation": explanation,
+                "recommended_action": self._recommended_action(key),
+            }
+
+        return None
+
+    @staticmethod
+    def _estimate_probability(confidence: float, projected: float, threshold: float) -> float:
+        margin = max(0.0, projected - threshold)
+        margin_component = min(40.0, margin * 1.5)
+        probability = 40.0 + margin_component + (confidence * 0.2)
+        return float(np.clip(probability, 0.0, 99.0))
+
+    @staticmethod
+    def _severity_for(probability: float, horizon: int) -> str:
+        if probability >= 80.0 and horizon <= 15:
+            return "CRITICAL"
+        if probability >= 65.0:
+            return "HIGH"
+        if probability >= 45.0:
+            return "MEDIUM"
+        return "LOW"
+
+    @staticmethod
+    def _issue_name(key: str) -> str:
+        names = {
+            "cpu_percent": "Possible CPU Overload",
+            "ram_percent": "Possible Memory Exhaustion",
+            "disk_percent": "Disk Capacity Approaching Limit",
+            "net_throughput_mb": "Possible Network Congestion",
+        }
+        return names.get(key, "Possible Resource Issue")
+
+    @staticmethod
+    def _recommended_action(key: str) -> str:
+        actions = {
+            "cpu_percent": "Identify and reduce CPU-intensive workloads before the projected threshold breach.",
+            "ram_percent": "Investigate for a memory leak and consider proactively restarting the top memory-consuming process.",
+            "disk_percent": "Free up disk space or expand storage capacity before it is exhausted.",
+            "net_throughput_mb": "Investigate the rising network activity for possible congestion or data exfiltration.",
+        }
+        return actions.get(key, "Monitor the affected metric closely.")
+
+    @staticmethod
+    def _root_cause_likelihood(key: str, rca_latest: Optional[Dict[str, Any]]) -> str:
+        if not rca_latest:
+            return "Unknown — no recent Root Cause Analysis available to correlate."
+
+        display_map = {
+            "cpu_percent": "CPU Usage", "ram_percent": "RAM Usage",
+            "disk_percent": "Disk Usage", "net_throughput_mb": "Network Throughput",
+        }
+        proc = rca_latest.get("responsible_process", {}).get("name", "N/A")
+        if rca_latest.get("primary_metric") == display_map.get(key) and proc and proc != "N/A":
+            return f"Likely '{proc}', consistent with the most recent Root Cause Analysis."
+        return "No strong process-level correlation identified yet."
+
+
+# ---------------------------------------------------------------------------
+# NEW: Explainable AI Recommendation Engine
+# ---------------------------------------------------------------------------
+class RecommendationEngine:
+    """Explainable AI Recommendation Engine.
+
+    Independent module, recalculated every monitoring cycle. Synthesizes
+    across this cycle's anomaly prediction, the latest Root Cause
+    Analysis, the latest Trend Analysis, and the latest Health Score into
+    prioritized, metric-referenced recommendations — never generic advice.
+
+    This is a separate implementation from the pre-existing
+    ``AnomalyDetectionEngine.generate_recommendations()`` (which remains
+    untouched and continues to back any existing consumers) — this
+    engine adds explicit ``reason``, ``confidence``, and
+    ``estimated_urgency`` fields per your spec, and reasons over the
+    already-computed downstream engine outputs rather than re-deriving
+    everything from raw metrics.
+
+    Attributes:
+        _parent: Read-only back-reference to the owning
+            ``AnomalyDetectionEngine``, used only to read the latest
+            Root Cause Analysis and Health Score results.
+        _history: Bounded history of past recommendation bundles.
+        _latest: The most recently generated list of recommendations.
+    """
+
+    def __init__(self, parent_engine: "AnomalyDetectionEngine") -> None:
+        self._parent: "AnomalyDetectionEngine" = parent_engine
+        self._history: deque = deque(maxlen=200)
+        self._latest: List[Dict[str, Any]] = []
+        self._lock: threading.Lock = threading.Lock()
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+    def generate(
+        self,
+        prediction: AnomalyPrediction,
+        metric: Dict[str, Any],
+        processes: List[Dict[str, Any]],
+        trend_results: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        """Generate prioritized, explainable recommendations for this cycle.
+
+        Args:
+            prediction: This cycle's :class:`AnomalyPrediction`.
+            metric: The raw system metric dict for this cycle.
+            processes: The top-process snapshot for this cycle.
+            trend_results: This cycle's output from
+                :meth:`TrendAnalysisEngine.analyze`.
+
+        Returns:
+            A list of recommendation dicts, sorted by priority, each with
+            ``timestamp``, ``priority``, ``recommendation``, ``reason``,
+            ``expected_impact``, ``confidence``, ``estimated_urgency``,
+            ``category``. Always non-empty (falls back to an explicit
+            "all normal" entry).
+        """
+        timestamp = datetime.now().isoformat()
+        rca_latest = self._parent._rca_engine.get_latest()
+        health_latest = self._parent._health_score_engine.get_latest()
+        trend_by_key = {t["metric_key"]: t for t in trend_results}
+
+        cpu = float(metric.get("cpu_percent", 0.0))
+        ram = float(metric.get("ram_percent", 0.0))
+        disk = float(metric.get("disk_percent", 0.0))
+        net = float(metric.get("net_sent_mb", 0.0)) + float(metric.get("net_recv_mb", 0.0))
+
+        recs: List[Dict[str, Any]] = []
+
+        if prediction.is_anomaly and rca_latest:
+            recs.append(self._from_rca(rca_latest))
+
+        cpu_trend = trend_by_key.get("cpu_percent")
+        if cpu > config.CPU_THRESHOLD or (cpu_trend and cpu_trend.get("classification") == "long_term_trend" and cpu_trend.get("rate_of_change_per_min", 0) > 0.5):
+            recs.append(self._cpu_recommendation(cpu, cpu_trend, processes))
+
+        ram_trend = trend_by_key.get("ram_percent")
+        if ram > config.RAM_THRESHOLD or (ram_trend and ram_trend.get("trend_name") == "Possible Memory Leak"):
+            recs.append(self._ram_recommendation(ram, ram_trend, processes))
+
+        disk_trend = trend_by_key.get("disk_percent")
+        if disk > 85.0 or (disk_trend and disk_trend.get("trend_name") == "Possible Resource Exhaustion"):
+            recs.append(self._disk_recommendation(disk, disk_trend))
+
+        net_trend = trend_by_key.get("net_throughput_mb")
+        if net > config.NETWORK_THRESHOLD or (net_trend and net_trend.get("classification") == "long_term_trend" and net_trend.get("rate_of_change_per_min", 0) > 0):
+            recs.append(self._network_recommendation(net, net_trend))
+
+        if health_latest and health_latest.get("health_score", 100.0) < 50.0:
+            recs.append(self._health_recommendation(health_latest))
+
+        if not recs:
+            recs.append({
+                "priority": "LOW",
+                "recommendation": "All systems operating within normal parameters. No action required.",
+                "reason": "No active anomalies, adverse trends, or degraded health score were detected this cycle.",
+                "expected_impact": "Continued stable operation.",
+                "confidence": 90.0,
+                "estimated_urgency": "None",
+                "category": "status",
+            })
+
+        priority_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
+        recs.sort(key=lambda r: priority_order.get(r.get("priority", "LOW"), 4))
+
+        for r in recs:
+            r["timestamp"] = timestamp
+
+        with self._lock:
+            self._latest = recs
+            self._history.append({"timestamp": timestamp, "recommendations": recs})
+
+        return recs
+
+    def get_latest(self) -> List[Dict[str, Any]]:
+        """Return the most recently generated recommendations."""
+        with self._lock:
+            return list(self._latest)
+
+    def get_history(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """Return past recommendation bundles, most recent first."""
+        with self._lock:
+            items = list(self._history)
+        items.reverse()
+        return items[:limit]
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _from_rca(rca: Dict[str, Any]) -> Dict[str, Any]:
+        severity = rca.get("severity", "MEDIUM")
+        return {
+            "priority": severity,
+            "recommendation": rca.get("recommendation", "Investigate the detected anomaly."),
+            "reason": (
+                f"Root Cause Analysis identified '{rca.get('root_cause', 'an anomaly')}' via "
+                f"{rca.get('primary_metric', 'an affected metric')}."
+            ),
+            "expected_impact": "Directly addresses the detected anomaly's root cause.",
+            "confidence": rca.get("confidence", 70.0),
+            "estimated_urgency": "Immediate" if severity in ("CRITICAL", "HIGH") else "Within 15 minutes",
+            "category": "anomaly",
+        }
+
+    @staticmethod
+    def _cpu_recommendation(
+        cpu: float, trend: Optional[Dict[str, Any]], processes: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        top_proc = processes[0].get("name", "unknown") if processes else "unknown"
+        reason = f"CPU usage is at {cpu:.1f}%"
+        reason += f", {trend['explanation']}" if trend else "."
+        return {
+            "priority": "CRITICAL" if cpu > 95 else "HIGH" if cpu > config.CPU_THRESHOLD else "MEDIUM",
+            "recommendation": f"Reduce CPU-intensive workloads; consider restarting '{top_proc}' if usage does not recover.",
+            "reason": reason,
+            "expected_impact": "Could reduce CPU usage by 10-30%.",
+            "confidence": trend["confidence"] if trend else 70.0,
+            "estimated_urgency": "Immediate" if cpu > 95 else "Within 15 minutes" if cpu > config.CPU_THRESHOLD else "Monitor closely",
+            "category": "cpu",
+        }
+
+    @staticmethod
+    def _ram_recommendation(
+        ram: float, trend: Optional[Dict[str, Any]], processes: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        mem_proc = "unknown"
+        if processes:
+            sorted_p = sorted(processes, key=lambda p: p.get("memory_percent", 0.0), reverse=True)
+            if sorted_p:
+                mem_proc = sorted_p[0].get("name", "unknown")
+
+        is_leak = bool(trend and trend.get("trend_name") == "Possible Memory Leak")
+        reason = f"RAM usage is at {ram:.1f}%"
+        reason += f", {trend['explanation']}" if trend else "."
+
+        return {
+            "priority": "CRITICAL" if ram > 95 else "HIGH",
+            "recommendation": (
+                f"Restart '{mem_proc}' and inspect its memory allocation for a leak."
+                if is_leak else
+                f"Close unused applications and monitor '{mem_proc}' memory consumption."
+            ),
+            "reason": reason,
+            "expected_impact": "May free 15-40% RAM and prevent OOM conditions.",
+            "confidence": trend["confidence"] if trend else 70.0,
+            "estimated_urgency": "Immediate" if ram > 95 else "Within 15 minutes",
+            "category": "ram",
+        }
+
+    @staticmethod
+    def _disk_recommendation(disk: float, trend: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        reason = f"Disk usage is at {disk:.1f}%"
+        reason += f", {trend['explanation']}" if trend else "."
+        return {
+            "priority": "CRITICAL" if disk > 95 else "HIGH",
+            "recommendation": "Clear temporary files/logs and consider expanding storage capacity.",
+            "reason": reason,
+            "expected_impact": "Prevents disk-full system failure.",
+            "confidence": trend["confidence"] if trend else 70.0,
+            "estimated_urgency": "Immediate" if disk > 95 else "Within 30 minutes",
+            "category": "disk",
+        }
+
+    @staticmethod
+    def _network_recommendation(net: float, trend: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        reason = f"Network throughput is {net:.3f} MB/cycle"
+        reason += f", {trend['explanation']}" if trend else "."
+        return {
+            "priority": "HIGH",
+            "recommendation": "Investigate abnormal network activity for possible data exfiltration or misconfiguration.",
+            "reason": reason,
+            "expected_impact": "May identify data exfiltration or bandwidth abuse.",
+            "confidence": trend["confidence"] if trend else 65.0,
+            "estimated_urgency": "Within 15 minutes",
+            "category": "network",
+        }
+
+    @staticmethod
+    def _health_recommendation(health: Dict[str, Any]) -> Dict[str, Any]:
+        score = health.get("health_score", 100.0)
+        return {
+            "priority": "HIGH" if score < 40 else "MEDIUM",
+            "recommendation": "Perform a full system review; multiple subsystems are contributing to a degraded health score.",
+            "reason": health.get("explanation", f"Health score is {score:.0f}/100."),
+            "expected_impact": "Restores overall system health to acceptable levels.",
+            "confidence": health.get("confidence", 70.0),
+            "estimated_urgency": "Within 15 minutes",
+            "category": "health",
+        }
+
+
+# ---------------------------------------------------------------------------
 # Module-level singleton (shared by main.py, api.py)
 # ---------------------------------------------------------------------------
 engine: AnomalyDetectionEngine = AnomalyDetectionEngine()
@@ -2644,3 +3436,57 @@ def get_health_score_history(limit: int = 50) -> List[Dict[str, Any]]:
     Intended for a future ``GET /ai/health-score/history`` endpoint in api.py.
     """
     return engine.get_health_score_history(limit=limit)
+
+
+def get_latest_trend_analysis() -> List[Dict[str, Any]]:
+    """Module-level convenience wrapper for
+    :meth:`AnomalyDetectionEngine.get_latest_trend_analysis`.
+
+    Intended for a future ``GET /ai/trend-analysis`` endpoint in api.py.
+    """
+    return engine.get_latest_trend_analysis()
+
+
+def get_trend_analysis_history(limit: int = 20) -> List[Dict[str, Any]]:
+    """Module-level convenience wrapper for
+    :meth:`AnomalyDetectionEngine.get_trend_analysis_history`.
+
+    Intended for a future ``GET /ai/trend-analysis/history`` endpoint in api.py.
+    """
+    return engine.get_trend_analysis_history(limit=limit)
+
+
+def get_latest_predictive_alerts() -> List[Dict[str, Any]]:
+    """Module-level convenience wrapper for
+    :meth:`AnomalyDetectionEngine.get_latest_predictive_alerts`.
+
+    Intended for a future ``GET /ai/predictive-alerts`` endpoint in api.py.
+    """
+    return engine.get_latest_predictive_alerts()
+
+
+def get_predictive_alerts_history(limit: int = 20) -> List[Dict[str, Any]]:
+    """Module-level convenience wrapper for
+    :meth:`AnomalyDetectionEngine.get_predictive_alerts_history`.
+
+    Intended for a future ``GET /ai/predictive-alerts/history`` endpoint in api.py.
+    """
+    return engine.get_predictive_alerts_history(limit=limit)
+
+
+def get_latest_smart_recommendations() -> List[Dict[str, Any]]:
+    """Module-level convenience wrapper for
+    :meth:`AnomalyDetectionEngine.get_latest_smart_recommendations`.
+
+    Intended for a future ``GET /ai/smart-recommendations`` endpoint in api.py.
+    """
+    return engine.get_latest_smart_recommendations()
+
+
+def get_smart_recommendations_history(limit: int = 20) -> List[Dict[str, Any]]:
+    """Module-level convenience wrapper for
+    :meth:`AnomalyDetectionEngine.get_smart_recommendations_history`.
+
+    Intended for a future ``GET /ai/smart-recommendations/history`` endpoint in api.py.
+    """
+    return engine.get_smart_recommendations_history(limit=limit)

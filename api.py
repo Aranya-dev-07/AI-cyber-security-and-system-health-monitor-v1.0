@@ -658,3 +658,143 @@ async def get_ai_health_score_history(limit: int = 50) -> List[Dict[str, Any]]:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while retrieving health score history.",
         )
+
+
+# ---------------------------------------------------------------------------
+# NEW: Explainable AI Trend Analysis Engine — endpoints
+# ---------------------------------------------------------------------------
+# NOTE ON NAMING: the pre-existing "/ai/trends" endpoint above already
+# serves the original AnomalyDetectionEngine.analyze_trends() method and
+# is left completely untouched. The new, independent TrendAnalysisEngine
+# (duration-in-minutes, spike-vs-long-term-trend classification,
+# historical comparison) is exposed under "/ai/trend-analysis" instead.
+@app.get(
+    "/ai/trend-analysis",
+    tags=["AI Trend Analysis"],
+    summary="Get the latest Explainable AI Trend Analysis (one entry per metric)",
+)
+async def get_ai_trend_analysis() -> List[Dict[str, Any]]:
+    """Return the most recent Trend Analysis result set.
+
+    Produced by the independent ``TrendAnalysisEngine`` in ai_engine.py,
+    recalculated every monitoring cycle. Returns an empty list until
+    enough samples have been collected.
+    """
+    try:
+        return _ai_engine.engine.get_latest_trend_analysis()
+    except Exception:
+        logger.exception("Failed to retrieve latest Trend Analysis.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving trend analysis.",
+        )
+
+
+@app.get(
+    "/ai/trend-analysis/history",
+    tags=["AI Trend Analysis"],
+    summary="Get historical Explainable AI Trend Analysis bundles",
+)
+async def get_ai_trend_analysis_history(limit: int = 20) -> List[Dict[str, Any]]:
+    """Return past Trend Analysis result bundles, most recent first."""
+    try:
+        return _ai_engine.engine.get_trend_analysis_history(limit=limit)
+    except Exception:
+        logger.exception("Failed to retrieve Trend Analysis history.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving trend analysis history.",
+        )
+
+
+# ---------------------------------------------------------------------------
+# NEW: Explainable AI Predictive Alert Engine — endpoints
+# ---------------------------------------------------------------------------
+@app.get(
+    "/ai/predictive-alerts",
+    tags=["AI Predictive Alerts"],
+    summary="Get the latest AI Predictive Alerts (forecast, not yet occurred)",
+)
+async def get_ai_predictive_alerts() -> List[Dict[str, Any]]:
+    """Return the most recently forecast predictive alerts.
+
+    Produced by the independent ``PredictiveAlertEngine`` in ai_engine.py.
+    These are forward-looking forecasts (5/15/30/60 minute horizons) and
+    are intentionally distinct from ``/ai/anomalies`` (already-occurred
+    events). May return an empty list if no metric is currently trending
+    toward its threshold.
+    """
+    try:
+        return _ai_engine.engine.get_latest_predictive_alerts()
+    except Exception:
+        logger.exception("Failed to retrieve latest Predictive Alerts.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving predictive alerts.",
+        )
+
+
+@app.get(
+    "/ai/predictive-alerts/history",
+    tags=["AI Predictive Alerts"],
+    summary="Get historical AI Predictive Alert bundles",
+)
+async def get_ai_predictive_alerts_history(limit: int = 20) -> List[Dict[str, Any]]:
+    """Return past predictive-alert bundles, most recent first."""
+    try:
+        return _ai_engine.engine.get_predictive_alerts_history(limit=limit)
+    except Exception:
+        logger.exception("Failed to retrieve Predictive Alert history.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving predictive alert history.",
+        )
+
+
+# ---------------------------------------------------------------------------
+# NEW: Explainable AI Recommendation Engine — endpoints
+# ---------------------------------------------------------------------------
+# NOTE ON NAMING: the pre-existing "/ai/recommendations" endpoint above
+# already serves the original AnomalyDetectionEngine.generate_recommendations()
+# method and is left completely untouched. The new, independent
+# RecommendationEngine (adds "reason", "confidence", "estimated_urgency"
+# and synthesizes across RCA + Trend Analysis + Health Score) is exposed
+# under "/ai/smart-recommendations" instead.
+@app.get(
+    "/ai/smart-recommendations",
+    tags=["AI Recommendations"],
+    summary="Get the latest Explainable AI Recommendations",
+)
+async def get_ai_smart_recommendations() -> List[Dict[str, Any]]:
+    """Return the most recently generated recommendations.
+
+    Produced by the independent ``RecommendationEngine`` in ai_engine.py,
+    synthesizing across the current anomaly prediction, Root Cause
+    Analysis, Trend Analysis, and Health Score. Always non-empty (falls
+    back to an explicit "all normal" entry).
+    """
+    try:
+        return _ai_engine.engine.get_latest_smart_recommendations()
+    except Exception:
+        logger.exception("Failed to retrieve latest AI recommendations.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving recommendations.",
+        )
+
+
+@app.get(
+    "/ai/smart-recommendations/history",
+    tags=["AI Recommendations"],
+    summary="Get historical Explainable AI Recommendation bundles",
+)
+async def get_ai_smart_recommendations_history(limit: int = 20) -> List[Dict[str, Any]]:
+    """Return past recommendation bundles, most recent first."""
+    try:
+        return _ai_engine.engine.get_smart_recommendations_history(limit=limit)
+    except Exception:
+        logger.exception("Failed to retrieve AI recommendation history.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving recommendation history.",
+        )

@@ -421,6 +421,122 @@ function HealthScoreCard({ health }) {
   )
 }
 
+// ─── NEW: AI Recommendations card ─────────────────────────────────────────────
+function SmartRecommendationsCard({ recommendations }) {
+  const list = recommendations || []
+  return (
+    <Card>
+      <SectionHeader title="AI Recommendations" subtitle="Explainable AI · prioritized, metric-referenced advice" dot="var(--olive)"/>
+
+      {list.length === 0
+        ? <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px 0', fontSize: 13 }}>
+            No recommendations available yet.
+          </div>
+        : <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {list.map((r, i) => (
+              <div key={i} style={{ padding: '12px 14px', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', borderLeft: `3px solid ${severityColor(r.priority)}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+                  <span style={{ background: severityBg(r.priority), color: severityColor(r.priority), borderRadius: 20, padding: '2px 10px', fontSize: 10, fontWeight: 700 }}>
+                    {r.priority}
+                  </span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>{r.category}</span>
+                  <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--olive-deep)', fontWeight: 600 }}>
+                    {r.estimated_urgency}
+                  </span>
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5, marginBottom: 6 }}>{r.recommendation}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: 6 }}>{r.reason}</div>
+                <div style={{ display: 'flex', gap: 16, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                  <span>Impact: <b style={{ color: 'var(--text)' }}>{r.expected_impact}</b></span>
+                  <span>Confidence: <b style={{ color: 'var(--text)' }}>{fmt(r.confidence)}%</b></span>
+                </div>
+              </div>
+            ))}
+          </div>
+      }
+    </Card>
+  )
+}
+
+// ─── NEW: AI Trend Analysis card ──────────────────────────────────────────────
+function TrendAnalysisCard({ trends }) {
+  const list = trends || []
+  return (
+    <Card>
+      <SectionHeader title="AI Trend Analysis" subtitle="Explainable AI · sustained trends vs. temporary spikes" dot="var(--peach)"/>
+
+      {list.length === 0
+        ? <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px 0', fontSize: 13 }}>
+            Not enough data collected yet to analyze trends.
+          </div>
+        : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 10 }}>
+            {list.map((t, i) => (
+              <div key={i} style={{ padding: '12px 14px', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', borderLeft: `3px solid ${severityColor(t.severity)}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: 'var(--peach-deep)' }}>{t.metric}</span>
+                  <span style={{ background: severityBg(t.severity), color: severityColor(t.severity), borderRadius: 20, padding: '1px 8px', fontSize: 9, fontWeight: 700 }}>
+                    {t.severity}
+                  </span>
+                  <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)' }}>
+                    {t.classification === 'temporary_spike' ? 'SPIKE' : t.classification === 'long_term_trend' ? 'TREND' : t.classification === 'stable' ? 'STABLE' : '—'}
+                  </span>
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t.trend_name}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: 6 }}>{t.explanation}</div>
+                <div style={{ display: 'flex', gap: 14, fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                  <span>Duration: <b style={{ color: 'var(--text)' }}>{fmt(t.duration_minutes)}m</b></span>
+                  <span>Rate: <b style={{ color: 'var(--text)' }}>{fmt(t.rate_of_change_per_min, 2)}%/min</b></span>
+                  <span>Confidence: <b style={{ color: 'var(--text)' }}>{fmt(t.confidence)}%</b></span>
+                </div>
+              </div>
+            ))}
+          </div>
+      }
+    </Card>
+  )
+}
+
+// ─── NEW: AI Predictive Alerts card ───────────────────────────────────────────
+function PredictiveAlertsCard({ alerts }) {
+  const list = alerts || []
+  return (
+    <Card>
+      <SectionHeader title="AI Predictive Alerts" subtitle="Explainable AI · forecasted issues, not yet occurred" dot="var(--coral)"/>
+
+      {list.length === 0
+        ? <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px 0', fontSize: 13 }}>
+            No metric is currently trending toward a threshold breach.
+          </div>
+        : <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {list.map((a, i) => (
+              <div key={i} style={{ padding: '12px 14px', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', borderLeft: `3px solid ${severityColor(a.predicted_severity)}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+                  <span style={{ background: severityBg(a.predicted_severity), color: severityColor(a.predicted_severity), borderRadius: 20, padding: '2px 10px', fontSize: 10, fontWeight: 700 }}>
+                    {a.predicted_severity}
+                  </span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: 'var(--coral-deep)' }}>{a.predicted_issue}</span>
+                  <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>
+                    ETA {a.estimated_time_until}
+                  </span>
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5, marginBottom: 6 }}>{a.explanation}</div>
+                <div style={{ display: 'flex', gap: 16, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)', flexWrap: 'wrap', marginBottom: 6 }}>
+                  <span>Horizon: <b style={{ color: 'var(--text)' }}>{a.horizon_minutes}m</b></span>
+                  <span>Probability: <b style={{ color: 'var(--text)' }}>{fmt(a.probability)}%</b></span>
+                  <span>Confidence: <b style={{ color: 'var(--text)' }}>{fmt(a.confidence)}%</b></span>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 4 }}>Likely cause: {a.root_cause_likelihood}</div>
+                <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', fontSize: 12, color: 'var(--text)', borderLeft: '3px solid var(--coral-deep)' }}>
+                  {a.recommended_action}
+                </div>
+              </div>
+            ))}
+          </div>
+      }
+    </Card>
+  )
+}
+
 // ─── Status pill ──────────────────────────────────────────────────────────────
 function StatusPill({ healthy }) {
   return (
@@ -451,6 +567,9 @@ export default function App() {
   const [anomalies,setAnomalies]= useState([])
   const [rca,      setRca]      = useState(null)
   const [health,   setHealth]   = useState(null)
+  const [trendAnalysis, setTrendAnalysis] = useState([])
+  const [predictiveAlerts, setPredictiveAlerts] = useState([])
+  const [smartRecs, setSmartRecs] = useState([])
 
   const histRef = useRef([])
 
@@ -489,6 +608,24 @@ export default function App() {
         const healthRes = await axios.get(`${API}/ai/health-score`)
         setHealth(healthRes.data)
       } catch { /* no monitoring cycle yet */ }
+
+      // AI Trend Analysis — graceful fallback (empty list until enough samples)
+      try {
+        const trendRes = await axios.get(`${API}/ai/trend-analysis`)
+        setTrendAnalysis(trendRes.data)
+      } catch { /* not enough data yet */ }
+
+      // AI Predictive Alerts — graceful fallback (empty list if nothing trending)
+      try {
+        const predRes = await axios.get(`${API}/ai/predictive-alerts`)
+        setPredictiveAlerts(predRes.data)
+      } catch { /* not available yet */ }
+
+      // AI Recommendations (explainable engine) — graceful fallback
+      try {
+        const recRes = await axios.get(`${API}/ai/smart-recommendations`)
+        setSmartRecs(recRes.data)
+      } catch { /* not available yet */ }
 
       setLastPoll(new Date())
     } catch (e) {
@@ -577,6 +714,15 @@ export default function App() {
 
         {/* NEW: AI HEALTH SCORE */}
         <HealthScoreCard health={health}/>
+
+        {/* NEW: AI RECOMMENDATIONS */}
+        <SmartRecommendationsCard recommendations={smartRecs}/>
+
+        {/* NEW: AI TREND ANALYSIS */}
+        <TrendAnalysisCard trends={trendAnalysis}/>
+
+        {/* NEW: AI PREDICTIVE ALERTS */}
+        <PredictiveAlertsCard alerts={predictiveAlerts}/>
 
       </main>
     </div>
