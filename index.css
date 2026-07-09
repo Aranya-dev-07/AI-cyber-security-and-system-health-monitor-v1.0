@@ -3,51 +3,50 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Strict 5-color palette */
-  --red:      #E02020;
-  --magenta:  #CC1899;
-  --white:    #FFFFFF;
-  --olive:    #6B8E23;
-  --lavender: #9B87C8;
+  /* Palette — red, magenta, olive green, lavender */
+  --mint:    #D6C7EE;   /* lavender (pastel) */
+  --sage:    #D6E2A8;   /* olive green (pastel) */
+  --peach:   #F0BEE0;   /* magenta (pastel) */
+  --coral:   #F0A8A4;   /* red (pastel) */
+  --rose:    #E88FB8;   /* magenta-red (pastel) */
 
-  /* Tints derived from the 5 colors only */
-  --red-light:      #3D1A1A;
-  --red-deep:       #FF4444;
-  --magenta-light:  #3D1A30;
-  --magenta-deep:   #E840B0;
-  --olive-light:    #1E2A10;
-  --olive-deep:     #8FBF2F;
-  --lavender-light: #1E1A30;
-  --lavender-deep:  #B8A8E0;
+  /* Extended palette */
+  --lavender: #B8A9D9;
+  --olive:    #8FAF6A;
 
-  /* Dark theme layout */
-  --bg:           #0A0A12;
-  --bg-secondary: #10101C;
-  --surface:      #14142A;
-  --surface-2:    #1A1A36;
-  --surface-3:    #202040;
-  --border:       #2A2A4A;
-  --border-light: #3A3A5A;
-  --text:         #E8E6F0;
-  --text-dim:     #A8A0C0;
-  --text-muted:   #6860A0;
+  /* Deeper tones for text/icons */
+  --mint-deep:    #7B5FC4;   /* lavender deep */
+  --sage-deep:    #6B8F3A;   /* olive deep */
+  --peach-deep:   #C6399C;   /* magenta deep */
+  --coral-deep:   #D6362E;   /* red deep */
+  --rose-deep:    #C21E56;   /* magenta-red deep */
+  --lavender-deep:#7B6BBF;
+  --olive-deep:   #5A8040;
 
-  --font-ui:    'DM Sans', sans-serif;
-  --font-mono:  'DM Mono', monospace;
-  --radius:     12px;
-  --radius-sm:  8px;
-  --radius-xs:  4px;
-  --shadow:     0 2px 8px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.2);
-  --shadow-md:  0 4px 12px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3);
-  --shadow-glow-olive:    0 0 20px rgba(107,142,35,0.15);
-  --shadow-glow-lavender: 0 0 20px rgba(155,135,200,0.15);
-  --shadow-glow-red:      0 0 20px rgba(224,32,32,0.15);
-  --shadow-glow-magenta:  0 0 20px rgba(204,24,153,0.15);
+  /* Layout — lavender + olive green background blend */
+  --bg:         #D8D0EE;
+  --bg-2:       #D0E0B8;
+  --surface:    #F0ECF8;
+  --surface-2:  #E4EDD8;
+  --border:     #C4B8E4;
+  --border-2:   #B8CFA0;
+  --text:       #2A2640;
+  --text-dim:   #5C5878;
+  --text-muted: #8E8AAA;
+
+  --font-ui:   'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --radius:    16px;
+  --radius-sm: 8px;
+  --shadow:    0 1px 3px rgba(120,100,180,0.08), 0 4px 12px rgba(100,140,80,0.06);
+  --shadow-md: 0 2px 8px rgba(120,100,180,0.10), 0 8px 24px rgba(100,140,80,0.08);
 }
 
 html, body, #root {
   height: 100%;
-  background: var(--bg);
+  /* Diagonal gradient blending lavender, magenta, red and olive green */
+  background: linear-gradient(135deg, #C8BEDF 0%, #E0A8CE 35%, #D68A8A 65%, #C0D494 100%);
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-ui);
   font-size: 14px;
@@ -56,9 +55,8 @@ html, body, #root {
 }
 
 ::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--lavender); }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--lavender); border-radius: 3px; }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
@@ -67,20 +65,4 @@ html, body, #root {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(-10px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(155,135,200,0.2); }
-  50%      { box-shadow: 0 0 15px rgba(155,135,200,0.4); }
-}
-@keyframes progressFill {
-  from { width: 0%; }
-  to   { width: var(--fill-width); }
-}
-@keyframes scanline {
-  0%   { transform: translateY(-100%); }
-  100% { transform: translateY(100vh); }
 }

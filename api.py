@@ -544,3 +544,117 @@ async def get_ai_insights() -> Dict[str, Any]:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred while generating insights.",
         )
+
+
+# ---------------------------------------------------------------------------
+# NEW: Explainable AI Root Cause Analysis Engine — endpoints
+# ---------------------------------------------------------------------------
+# NOTE ON NAMING: the pre-existing "/ai/root-cause" endpoint above already
+# serves the original AnomalyDetectionEngine.analyze_root_cause() method
+# and is left completely untouched. The new, independent
+# RootCauseAnalysisEngine (which produces a richer, single-object,
+# explanation-first result keyed to the most recently *detected* anomaly)
+# is exposed under "/ai/rca" instead, to avoid any collision with the
+# existing route or response shape.
+@app.get(
+    "/ai/rca",
+    tags=["AI Root Cause Analysis"],
+    summary="Get the latest Explainable AI Root Cause Analysis result",
+    responses={404: {"model": ErrorResponse, "description": "No anomaly has been analyzed yet."}},
+)
+async def get_ai_rca_latest() -> Dict[str, Any]:
+    """Return the most recent Explainable AI Root Cause Analysis result.
+
+    Produced by the independent ``RootCauseAnalysisEngine`` in
+    ai_engine.py, which runs only after an anomaly has already been
+    detected. Returns 404 until the first anomaly of the session occurs.
+    """
+    try:
+        result = _ai_engine.engine.get_latest_root_cause_analysis()
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No anomaly has been analyzed yet.",
+            )
+        return result
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to retrieve latest Root Cause Analysis result.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving root cause analysis.",
+        )
+
+
+@app.get(
+    "/ai/rca/history",
+    tags=["AI Root Cause Analysis"],
+    summary="Get historical Explainable AI Root Cause Analysis results",
+)
+async def get_ai_rca_history(limit: int = 20) -> List[Dict[str, Any]]:
+    """Return past Root Cause Analysis results, most recent first."""
+    try:
+        return _ai_engine.engine.get_root_cause_analysis_history(limit=limit)
+    except Exception:
+        logger.exception("Failed to retrieve Root Cause Analysis history.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving root cause analysis history.",
+        )
+
+
+# ---------------------------------------------------------------------------
+# NEW: Explainable AI Health Score Engine — endpoints
+# ---------------------------------------------------------------------------
+# NOTE ON NAMING: the pre-existing "/ai/health" endpoint above already
+# serves the original AnomalyDetectionEngine.compute_health_score()
+# bookkeeping and is left completely untouched. The new, independent
+# HealthScoreEngine (weighted, explainable, recalculated every cycle) is
+# exposed under "/ai/health-score" instead.
+@app.get(
+    "/ai/health-score",
+    tags=["AI Health Score"],
+    summary="Get the latest Explainable AI Health Score",
+    responses={404: {"model": ErrorResponse, "description": "No monitoring cycle has run yet."}},
+)
+async def get_ai_health_score() -> Dict[str, Any]:
+    """Return the current Explainable AI Health Score.
+
+    Produced by the independent ``HealthScoreEngine`` in ai_engine.py,
+    recalculated every monitoring cycle. Returns 404 until the first
+    monitoring cycle of the session completes.
+    """
+    try:
+        result = _ai_engine.engine.get_latest_health_score()
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No monitoring cycle has run yet. Start monitoring first.",
+            )
+        return result
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to retrieve latest AI Health Score.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving the health score.",
+        )
+
+
+@app.get(
+    "/ai/health-score/history",
+    tags=["AI Health Score"],
+    summary="Get historical Explainable AI Health Score values",
+)
+async def get_ai_health_score_history(limit: int = 50) -> List[Dict[str, Any]]:
+    """Return past Health Score values, most recent first (for a sparkline)."""
+    try:
+        return _ai_engine.engine.get_health_score_history(limit=limit)
+    except Exception:
+        logger.exception("Failed to retrieve AI Health Score history.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while retrieving health score history.",
+        )

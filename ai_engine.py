@@ -14,35 +14,35 @@ ARCHITECTURE
 The module is built around a single class ``AnomalyDetectionEngine``
 that owns the full ML lifecycle:
 
-    1. Initialization — model + scaler creation (``initialize_model``)
+    1. Initialization   — model + scaler creation (``initialize_model``)
     2. Data preparation — feature engineering + scaling (``prepare_training_data``)
-    3. Training — Isolation Forest fitting (``train_model``)
-    4. Inference — per-cycle anomaly scoring (``predict_anomaly``)
-    5. Alerting — intelligent human-readable alerts (``generate_ai_alert``)
-    6. Persistence — joblib save/load (``save_model`` / ``load_model``)
-    7. Health scoring — composite system health (``compute_health_score``)
-    8. Root cause — metric attribution (``analyze_root_cause``)
-    9. Trend analysis — rolling trend detection (``analyze_trends``)
+    3. Training         — Isolation Forest fitting (``train_model``)
+    4. Inference        — per-cycle anomaly scoring (``predict_anomaly``)
+    5. Alerting         — intelligent human-readable alerts (``generate_ai_alert``)
+    6. Persistence      — joblib save/load (``save_model`` / ``load_model``)
+    7. Health scoring   — composite system health (``compute_health_score``)
+    8. Root cause       — metric attribution (``analyze_root_cause``)
+    9. Trend analysis   — rolling trend detection (``analyze_trends``)
     10. Recommendations — actionable advice (``generate_recommendations``)
-    11. Timeline — chronological event log (``get_timeline``)
-    12. Insights — NL system summary (``generate_insights``)
+    11. Timeline        — chronological event log (``get_timeline``)
+    12. Insights        — NL system summary (``generate_insights``)
     13. Historical comparison — baseline deviation (``compare_to_baseline``)
 
 DATA FLOW
 ----------
     config.py (metrics_data + process_data)
         ↓
-    prepare_training_data() — cleans, engineers, scales features
+    prepare_training_data()   — cleans, engineers, scales features
         ↓
-    train_model() — fits Isolation Forest on historical data
-        ↓ [every monitoring cycle]
-    predict_anomaly(metric) — returns AnomalyPrediction dataclass
+    train_model()             — fits Isolation Forest on historical data
+        ↓  [every monitoring cycle]
+    predict_anomaly(metric)   — returns AnomalyPrediction dataclass
         ↓
-    generate_ai_alert() — prints structured alert to terminal
+    generate_ai_alert()       — prints structured alert to terminal
         ↓
-    database.insert_ai_prediction() — persists result to SQLite
+    database.insert_ai_prediction()   — persists result to SQLite
         ↓
-    api.py GET /ai/* — exposes predictions to the dashboard
+    api.py GET /ai/*          — exposes predictions to the dashboard
 
 WHY ISOLATION FOREST
 ---------------------
@@ -62,8 +62,8 @@ additional locking. Training (a write operation) is protected by
 
 MODEL PERSISTENCE
 ------------------
-    models/isolation_forest.joblib — fitted IsolationForest object
-    models/scaler.joblib — fitted StandardScaler object
+    models/isolation_forest.joblib   — fitted IsolationForest object
+    models/scaler.joblib             — fitted StandardScaler object
 """
 
 from __future__ import annotations
@@ -88,9 +88,9 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-_HERE = os.path.dirname(os.path.abspath(__file__))
-MODELS_DIR = os.path.join(_HERE, "models")
-MODEL_PATH = os.path.join(MODELS_DIR, "isolation_forest.joblib")
+_HERE       = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR  = os.path.join(_HERE, "models")
+MODEL_PATH  = os.path.join(MODELS_DIR, "isolation_forest.joblib")
 SCALER_PATH = os.path.join(MODELS_DIR, "scaler.joblib")
 
 os.makedirs(MODELS_DIR, exist_ok=True)
@@ -120,13 +120,13 @@ class ModelConfig:
         zscore_spike_threshold: Z-score above which a single-feature
             spike is flagged in the reason string.
     """
-    n_estimators: int = 100
-    contamination: Any = "auto"
-    max_samples: Any = "auto"
-    random_state: int = 42
-    rolling_window: int = 20
-    min_train_samples: int = 10
-    retrain_interval: int = 100
+    n_estimators:          int   = 100
+    contamination:         Any   = "auto"
+    max_samples:           Any   = "auto"
+    random_state:          int   = 42
+    rolling_window:        int   = 20
+    min_train_samples:     int   = 10
+    retrain_interval:      int   = 100
     zscore_spike_threshold: float = 2.5
 
 
@@ -153,14 +153,14 @@ class AnomalyPrediction:
         model_tier: Which model tier produced this prediction
             (``"isolation_forest"`` for Tier 1).
     """
-    timestamp: str
-    is_anomaly: bool
+    timestamp:     str
+    is_anomaly:    bool
     anomaly_score: float
-    confidence: float
-    severity: str
-    reason: str
+    confidence:    float
+    severity:      str
+    reason:        str
     features_used: List[str] = field(default_factory=list)
-    model_tier: str = "isolation_forest"
+    model_tier:    str       = "isolation_forest"
 
     def to_dict(self) -> Dict[str, Any]:
         """Return a plain dict (database / API friendly)."""
@@ -194,7 +194,7 @@ FEATURE_NAMES: List[str] = [
 class TimelineEvent:
     """One entry in the chronological system health timeline."""
     timestamp: str
-    event_type: str # "metric", "anomaly", "alert", "health", "trend", "root_cause"
+    event_type: str          # "metric", "anomaly", "alert", "health", "trend", "root_cause"
     title: str
     description: str
     severity: str = "NORMAL"
@@ -225,7 +225,7 @@ class AnomalyDetectionEngine:
 
         engine = AnomalyDetectionEngine()
         engine.initialize_model()
-        engine.load_model() # loads saved model if available
+        engine.load_model()          # loads saved model if available
 
         # after enough data has been collected:
         engine.train_model(metrics_list)
@@ -237,18 +237,18 @@ class AnomalyDetectionEngine:
     """
 
     def __init__(self, model_config: Optional[ModelConfig] = None) -> None:
-        self.cfg = model_config or ModelConfig()
-        self._model: Optional[IsolationForest] = None
-        self._scaler: Optional[StandardScaler] = None
-        self._is_trained: bool = False
-        self._training_lock: threading.Lock = threading.Lock()
-        self._samples_since_retrain: int = 0
-        self._total_predictions: int = 0
+        self.cfg             = model_config or ModelConfig()
+        self._model: Optional[IsolationForest]  = None
+        self._scaler: Optional[StandardScaler]  = None
+        self._is_trained: bool                  = False
+        self._training_lock: threading.Lock     = threading.Lock()
+        self._samples_since_retrain: int        = 0
+        self._total_predictions: int            = 0
 
         # Rolling windows for feature computation (per-metric deques)
-        self._rolling_cpu: deque = deque(maxlen=self.cfg.rolling_window)
-        self._rolling_ram: deque = deque(maxlen=self.cfg.rolling_window)
-        self._rolling_net: deque = deque(maxlen=self.cfg.rolling_window)
+        self._rolling_cpu:  deque = deque(maxlen=self.cfg.rolling_window)
+        self._rolling_ram:  deque = deque(maxlen=self.cfg.rolling_window)
+        self._rolling_net:  deque = deque(maxlen=self.cfg.rolling_window)
 
         # ── NEW: state for dashboard intelligence layer ──
         self._timeline: deque = deque(maxlen=500)
@@ -265,6 +265,19 @@ class AnomalyDetectionEngine:
             "net_throughput_mb": 0.0,
         }
         self._baseline_computed: bool = False
+
+        # ── NEW: Explainable AI Root Cause Analysis Engine ──
+        # Independent module, consumes predictions only after they are
+        # made — never re-runs or alters anomaly detection itself.
+        self._rca_engine: "RootCauseAnalysisEngine" = RootCauseAnalysisEngine(self)
+
+        # ── NEW: Explainable AI Health Score Engine ──
+        # Independent module, recalculated every monitoring cycle.
+        # Does not read or modify self._health_score / _health_status
+        # (the pre-existing internal bookkeeping used by recommendations
+        # and trend penalties) — this is a separate, explicitly weighted,
+        # fully explainable score computed in parallel.
+        self._health_score_engine: "HealthScoreEngine" = HealthScoreEngine(self)
 
     # ------------------------------------------------------------------
     # Public API — original methods
@@ -288,7 +301,7 @@ class AnomalyDetectionEngine:
                     random_state=self.cfg.random_state,
                     n_jobs=-1,
                 )
-                self._scaler = StandardScaler()
+                self._scaler    = StandardScaler()
                 self._is_trained = False
 
             logger.info(
@@ -395,9 +408,9 @@ class AnomalyDetectionEngine:
                 if self._model is None or self._scaler is None:
                     self.initialize_model()
 
-                scaled = self._scaler.fit_transform(matrix) # type: ignore[union-attr]
-                self._model.fit(scaled) # type: ignore[union-attr]
-                self._is_trained = True
+                scaled = self._scaler.fit_transform(matrix)      # type: ignore[union-attr]
+                self._model.fit(scaled)                           # type: ignore[union-attr]
+                self._is_trained       = True
                 self._samples_since_retrain = 0
 
             # Compute baseline from training data
@@ -457,7 +470,7 @@ class AnomalyDetectionEngine:
         self._rolling_net.append(net)
 
         self._samples_since_retrain += 1
-        self._total_predictions += 1
+        self._total_predictions     += 1
 
         # Schedule background retrain if interval reached
         if (
@@ -481,6 +494,13 @@ class AnomalyDetectionEngine:
             )
             # Still update health score even when untrained
             self._update_health_score(metric, prediction, processes)
+
+            # ── NEW: Explainable AI Health Score — recalculated every cycle ──
+            try:
+                self._health_score_engine.compute(metric, processes or [], prediction)
+            except Exception:
+                logger.exception("Health Score computation failed (untrained-model branch).")
+
             return prediction
 
         try:
@@ -492,12 +512,12 @@ class AnomalyDetectionEngine:
             feature_array = self._impute(feature_array)
 
             with self._training_lock:
-                scaled = self._scaler.transform(feature_array)
+                scaled  = self._scaler.transform(feature_array)
                 raw_score = float(self._model.score_samples(scaled)[0])
 
             is_anomaly, confidence = self._score_to_decision(raw_score)
             severity = self._compute_severity(raw_score, feature_array[0], metric)
-            reason = self._build_reason(feature_array[0], metric, is_anomaly)
+            reason   = self._build_reason(feature_array[0], metric, is_anomaly)
 
             prediction = AnomalyPrediction(
                 timestamp=timestamp,
@@ -511,6 +531,12 @@ class AnomalyDetectionEngine:
 
             # Update all dashboard intelligence
             self._update_health_score(metric, prediction, processes)
+
+            # ── NEW: Explainable AI Health Score — recalculated every cycle ──
+            try:
+                self._health_score_engine.compute(metric, processes or [], prediction)
+            except Exception:
+                logger.exception("Health Score computation failed.")
 
             if is_anomaly:
                 self._register_anomaly(prediction, metric, processes)
@@ -550,24 +576,24 @@ class AnomalyDetectionEngine:
             return
 
         severity_colors = {
-            "LOW": "⚠ ",
-            "MEDIUM": "🔶",
-            "HIGH": "🔴",
+            "LOW":      "⚠ ",
+            "MEDIUM":   "🔶",
+            "HIGH":     "🔴",
             "CRITICAL": "🚨",
         }
         icon = severity_colors.get(prediction.severity, "⚠ ")
 
         alert = (
             f"\n{'=' * 60}\n"
-            f" {icon} [AI ALERT] Potential anomaly detected.\n"
+            f"  {icon}  [AI ALERT]  Potential anomaly detected.\n"
             f"{'=' * 60}\n"
-            f" Confidence : {prediction.confidence:.1f}%\n"
-            f" Severity : {prediction.severity}\n"
-            f" Score : {prediction.anomaly_score:.4f}\n"
-            f" Reason :\n"
-            f" {prediction.reason}\n"
-            f" Timestamp : {prediction.timestamp}\n"
-            f" Model Tier : {prediction.model_tier}\n"
+            f"  Confidence : {prediction.confidence:.1f}%\n"
+            f"  Severity   : {prediction.severity}\n"
+            f"  Score      : {prediction.anomaly_score:.4f}\n"
+            f"  Reason     :\n"
+            f"    {prediction.reason}\n"
+            f"  Timestamp  : {prediction.timestamp}\n"
+            f"  Model Tier : {prediction.model_tier}\n"
             f"{'=' * 60}\n"
         )
         print(alert)
@@ -593,7 +619,7 @@ class AnomalyDetectionEngine:
 
         try:
             os.makedirs(MODELS_DIR, exist_ok=True)
-            joblib.dump(self._model, MODEL_PATH)
+            joblib.dump(self._model,  MODEL_PATH)
             joblib.dump(self._scaler, SCALER_PATH)
             logger.info("Model saved to '%s'.", MODEL_PATH)
             return True
@@ -622,8 +648,8 @@ class AnomalyDetectionEngine:
 
         try:
             with self._training_lock:
-                self._model = joblib.load(MODEL_PATH)
-                self._scaler = joblib.load(SCALER_PATH)
+                self._model   = joblib.load(MODEL_PATH)
+                self._scaler  = joblib.load(SCALER_PATH)
                 self._is_trained = True
 
             logger.info("Loaded saved model from '%s'.", MODEL_PATH)
@@ -786,6 +812,55 @@ class AnomalyDetectionEngine:
             A list of anomaly dicts, most recent first, max 20.
         """
         return list(reversed(self._active_anomalies[-20:]))
+
+    # ------------------------------------------------------------------
+    # NEW: Explainable AI Root Cause Analysis — public accessors
+    # ------------------------------------------------------------------
+    def get_latest_root_cause_analysis(self) -> Optional[Dict[str, Any]]:
+        """Return the most recent Root Cause Analysis result, if any.
+
+        This is produced by the independent :class:`RootCauseAnalysisEngine`
+        and reflects the most recently *detected* anomaly only — it does
+        not perform any new detection itself.
+
+        Returns:
+            The result dict (see :meth:`RootCauseAnalysisEngine.analyze`
+            for the schema), or ``None`` if no anomaly has occurred yet.
+        """
+        return self._rca_engine.get_latest()
+
+    def get_root_cause_analysis_history(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """Return past Root Cause Analysis results, most recent first.
+
+        Args:
+            limit: Maximum number of results to return.
+        """
+        return self._rca_engine.get_history(limit=limit)
+
+    # ------------------------------------------------------------------
+    # NEW: Explainable AI Health Score — public accessors
+    # ------------------------------------------------------------------
+    def get_latest_health_score(self) -> Optional[Dict[str, Any]]:
+        """Return the most recent Health Score result, if any.
+
+        Produced by the independent :class:`HealthScoreEngine`, recomputed
+        every monitoring cycle. Does not read the pre-existing internal
+        ``compute_health_score()`` bookkeeping — this is a separate,
+        explicitly weighted, fully explainable score.
+
+        Returns:
+            The result dict (see :meth:`HealthScoreEngine.compute` for the
+            schema), or ``None`` if no monitoring cycle has run yet.
+        """
+        return self._health_score_engine.get_latest()
+
+    def get_health_score_history(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """Return past Health Score results, most recent first.
+
+        Args:
+            limit: Maximum number of results to return.
+        """
+        return self._health_score_engine.get_history(limit=limit)
 
     def generate_recommendations(self) -> List[Dict[str, Any]]:
         """Generate actionable recommendations based on current state.
@@ -1226,20 +1301,20 @@ class AnomalyDetectionEngine:
         rolling_net: deque,
     ) -> List[float]:
         """Compute the full feature vector for one monitoring sample."""
-        cpu = float(metric.get("cpu_percent", 0.0))
-        ram = float(metric.get("ram_percent", 0.0))
-        disk = float(metric.get("disk_percent", 0.0))
-        sent = float(metric.get("net_sent_mb", 0.0))
-        recv = float(metric.get("net_recv_mb", 0.0))
+        cpu    = float(metric.get("cpu_percent",  0.0))
+        ram    = float(metric.get("ram_percent",  0.0))
+        disk   = float(metric.get("disk_percent", 0.0))
+        sent   = float(metric.get("net_sent_mb",  0.0))
+        recv   = float(metric.get("net_recv_mb",  0.0))
         net_tp = sent + recv
 
         cpu_ram_ratio = cpu / max(ram, 1.0)
 
-        proc_cpus = [float(p.get("cpu_percent", 0.0)) for p in processes]
-        proc_mems = [float(p.get("memory_percent", 0.0)) for p in processes]
-        avg_proc_cpu = float(np.mean(proc_cpus)) if proc_cpus else 0.0
-        avg_proc_mem = float(np.mean(proc_mems)) if proc_mems else 0.0
-        total_procs = float(len(processes))
+        proc_cpus  = [float(p.get("cpu_percent",    0.0)) for p in processes]
+        proc_mems  = [float(p.get("memory_percent", 0.0)) for p in processes]
+        avg_proc_cpu = float(np.mean(proc_cpus))  if proc_cpus else 0.0
+        avg_proc_mem = float(np.mean(proc_mems))  if proc_mems else 0.0
+        total_procs  = float(len(processes))
 
         rolling_cpu.append(cpu)
         rolling_ram.append(ram)
@@ -1260,7 +1335,7 @@ class AnomalyDetectionEngine:
         """Replace NaN and Inf values with column medians."""
         matrix = np.where(np.isinf(matrix), np.nan, matrix)
         col_medians = np.nanmedian(matrix, axis=0)
-        nan_mask = np.isnan(matrix)
+        nan_mask    = np.isnan(matrix)
         if nan_mask.any():
             matrix[nan_mask] = np.take(col_medians, np.where(nan_mask)[1])
         return matrix
@@ -1379,8 +1454,8 @@ class AnomalyDetectionEngine:
         def _retrain() -> None:
             logger.info("Background retrain triggered after %d new samples.", self.cfg.retrain_interval)
             with config.data_lock:
-                metrics_snap = list(config.metrics_data)
-                process_snap = list(config.process_data)
+                metrics_snap  = list(config.metrics_data)
+                process_snap  = list(config.process_data)
             self.train_model(metrics_snap, process_snap)
 
         t = threading.Thread(target=_retrain, daemon=True, name="AIRetrainThread")
@@ -1560,6 +1635,26 @@ class AnomalyDetectionEngine:
             severity=prediction.severity,
             metadata={"score": prediction.anomaly_score, "confidence": prediction.confidence},
         )
+
+        # ── NEW: Explainable AI Root Cause Analysis ──
+        # Runs strictly after the anomaly above has already been detected
+        # and registered. Performs no detection of its own — it only
+        # explains this prediction.
+        try:
+            rca_result = self._rca_engine.analyze(prediction, metric, processes or [])
+            self._add_timeline_event(
+                "root_cause",
+                f"Root Cause: {rca_result['root_cause']}",
+                rca_result["explanation"][:160],
+                severity=rca_result["severity"],
+                metadata={
+                    "primary_metric": rca_result["primary_metric"],
+                    "responsible_process": rca_result["responsible_process"].get("name"),
+                    "confidence": rca_result["confidence"],
+                },
+            )
+        except Exception:
+            logger.exception("Root Cause Analysis failed for anomaly at %s.", prediction.timestamp)
 
     def _compute_deviations(self, metric: Dict[str, Any]) -> Dict[str, float]:
         """Compute how far each metric deviates from its baseline (%)."""
@@ -1757,6 +1852,711 @@ class AnomalyDetectionEngine:
 
 
 # ---------------------------------------------------------------------------
+# NEW: Explainable AI Root Cause Analysis Engine
+# ---------------------------------------------------------------------------
+class RootCauseAnalysisEngine:
+    """Explainable AI Root Cause Analysis Engine.
+
+    Independent module that runs strictly *after* ``AnomalyDetectionEngine``
+    has already flagged a sample as anomalous. It performs NO anomaly
+    detection of its own — it only consumes an already-computed
+    :class:`AnomalyPrediction` plus the raw metric/process snapshot that
+    produced it, and explains *why* the anomaly happened.
+
+    This keeps the original Isolation Forest detection logic completely
+    untouched: this class is a pure downstream consumer, wired in from
+    ``AnomalyDetectionEngine._register_anomaly`` (an additive "dashboard
+    intelligence" hook, not part of the core scoring path).
+
+    Attributes:
+        _parent: Read-only back-reference to the owning
+            ``AnomalyDetectionEngine``, used only to read its rolling
+            windows and learned baseline. No state is written back to it.
+        _history: Bounded history of past root-cause results, most
+            recent last.
+        _latest: The most recently computed root-cause result, or
+            ``None`` if no anomaly has been analyzed yet this session.
+    """
+
+    # Root-cause classification labels
+    _LABEL_CPU_SATURATION      = "CPU Saturation"
+    _LABEL_MEMORY_LEAK         = "Possible Memory Leak"
+    _LABEL_DISK_BOTTLENECK     = "Disk Bottleneck"
+    _LABEL_NETWORK_TRAFFIC     = "Heavy Network Traffic"
+    _LABEL_RUNAWAY_PROCESS     = "Runaway Process"
+    _LABEL_RESOURCE_SPIKE      = "Abnormal Resource Spike"
+    _LABEL_TOO_MANY_PROCESSES  = "Too Many Background Processes"
+    _LABEL_MULTI_HIGH_PROCESS  = "Multiple High Resource Processes"
+
+    def __init__(self, parent_engine: "AnomalyDetectionEngine") -> None:
+        self._parent: "AnomalyDetectionEngine" = parent_engine
+        self._history: deque = deque(maxlen=100)
+        self._latest: Optional[Dict[str, Any]] = None
+        self._lock: threading.Lock = threading.Lock()
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+    def analyze(
+        self,
+        prediction: AnomalyPrediction,
+        metric: Dict[str, Any],
+        processes: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """Explain a single already-detected anomaly.
+
+        Args:
+            prediction: The :class:`AnomalyPrediction` returned by
+                ``AnomalyDetectionEngine.predict_anomaly`` for this cycle.
+                Only consumed — never recomputed.
+            metric: The raw system metric dict for this cycle.
+            processes: The top-process snapshot for this cycle.
+
+        Returns:
+            A database/API-friendly dict matching the documented Root
+            Cause Analysis output schema (``timestamp``, ``root_cause``,
+            ``primary_metric``, ``responsible_process``, ``confidence``,
+            ``severity``, ``historical_comparison``, ``recommendation``,
+            ``explanation``).
+        """
+        deviations = self._parent._compute_deviations(metric)
+        primary_key, primary_dev = self._identify_primary_metric(deviations)
+
+        responsible_process = self._identify_responsible_process(primary_key, processes)
+
+        duration_samples, continuous_increase = self._trend_context(primary_key)
+        duration_min = (duration_samples * config.MONITOR_INTERVAL) / 60.0
+
+        root_cause = self._classify_root_cause(
+            primary_key, primary_dev, deviations, processes, continuous_increase
+        )
+
+        explanation = self._build_explanation(
+            primary_key, primary_dev, metric, responsible_process,
+            duration_min, continuous_increase, root_cause,
+        )
+
+        historical_comparison = self._historical_comparison_text(primary_key, primary_dev)
+
+        recommendation = self._build_recommendation(root_cause, responsible_process, primary_key)
+
+        confidence = self._compute_confidence(prediction, primary_dev)
+
+        result: Dict[str, Any] = {
+            "timestamp": prediction.timestamp,
+            "root_cause": root_cause,
+            "primary_metric": self._display_metric_name(primary_key),
+            "responsible_process": responsible_process,
+            "confidence": round(confidence, 1),
+            "severity": prediction.severity,
+            "historical_comparison": historical_comparison,
+            "recommendation": recommendation,
+            "explanation": explanation,
+        }
+
+        with self._lock:
+            self._latest = result
+            self._history.append(result)
+
+        return result
+
+    def get_latest(self) -> Optional[Dict[str, Any]]:
+        """Return the most recently computed root-cause result, if any."""
+        with self._lock:
+            return dict(self._latest) if self._latest else None
+
+    def get_history(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """Return past root-cause results, most recent first."""
+        with self._lock:
+            items = list(self._history)
+        items.reverse()
+        return items[:limit]
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _display_metric_name(key: str) -> str:
+        names = {
+            "cpu_percent": "CPU Usage",
+            "ram_percent": "RAM Usage",
+            "disk_percent": "Disk Usage",
+            "net_throughput_mb": "Network Throughput",
+            "process_activity": "Process Activity",
+        }
+        return names.get(key, key.replace("_", " ").title())
+
+    def _identify_primary_metric(self, deviations: Dict[str, float]) -> Tuple[str, float]:
+        """Pick the metric with the largest absolute deviation from baseline."""
+        if not deviations:
+            return "cpu_percent", 0.0
+        sorted_devs = sorted(deviations.items(), key=lambda kv: abs(kv[1]), reverse=True)
+        return sorted_devs[0]
+
+    def _identify_responsible_process(
+        self, primary_key: str, processes: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """Pick the top process for the resource type behind the anomaly.
+
+        Note: the project's process collector (``config.py``) tracks
+        ``memory_percent`` rather than an absolute MB figure, so the
+        ``memory`` field below is a percentage, not megabytes.
+        """
+        if not processes:
+            return {
+                "name": "N/A", "pid": -1, "cpu": 0.0, "memory": 0.0, "status": "unknown",
+            }
+
+        if "ram" in primary_key or "memory" in primary_key:
+            sorted_p = sorted(processes, key=lambda p: p.get("memory_percent", 0.0), reverse=True)
+        else:
+            sorted_p = sorted(processes, key=lambda p: p.get("cpu_percent", 0.0), reverse=True)
+
+        top = sorted_p[0]
+        return {
+            "name":   top.get("name", "unknown"),
+            "pid":    top.get("pid", -1),
+            "cpu":    round(float(top.get("cpu_percent", 0.0)), 2),
+            "memory": round(float(top.get("memory_percent", 0.0)), 2),
+            "status": top.get("status", "unknown"),
+        }
+
+    def _trend_context(self, primary_key: str) -> Tuple[int, bool]:
+        """Return (samples above baseline, is continuously increasing)."""
+        window_map = {
+            "cpu_percent": self._parent._rolling_cpu,
+            "ram_percent": self._parent._rolling_ram,
+            "net_throughput_mb": self._parent._rolling_net,
+        }
+        window = window_map.get(primary_key)
+        if not window or len(window) < 2:
+            return 0, False
+
+        values = list(window)
+        baseline = self._parent._baseline.get(primary_key, 0.0)
+        duration = sum(1 for v in values if baseline and v > baseline)
+
+        tail = values[-5:] if len(values) >= 5 else values
+        continuous_increase = len(tail) >= 3 and all(
+            tail[i] <= tail[i + 1] for i in range(len(tail) - 1)
+        )
+        return duration, continuous_increase
+
+    def _classify_root_cause(
+        self,
+        primary_key: str,
+        primary_dev: float,
+        deviations: Dict[str, float],
+        processes: List[Dict[str, Any]],
+        continuous_increase: bool,
+    ) -> str:
+        """Map metric + pattern context to a labelled root cause."""
+        high_dev_count = sum(1 for v in deviations.values() if abs(v) >= 30)
+
+        if high_dev_count >= 2:
+            return self._LABEL_MULTI_HIGH_PROCESS
+
+        high_cpu_procs = sum(1 for p in processes if p.get("cpu_percent", 0.0) > 50)
+        if len(processes) >= 5 and high_cpu_procs >= 3:
+            return self._LABEL_TOO_MANY_PROCESSES
+
+        if "ram" in primary_key:
+            return self._LABEL_MEMORY_LEAK if continuous_increase else self._LABEL_RESOURCE_SPIKE
+        if "cpu" in primary_key:
+            if processes and processes[0].get("cpu_percent", 0.0) > 90:
+                return self._LABEL_RUNAWAY_PROCESS
+            return self._LABEL_CPU_SATURATION
+        if "disk" in primary_key:
+            return self._LABEL_DISK_BOTTLENECK
+        if "net" in primary_key:
+            return self._LABEL_NETWORK_TRAFFIC
+
+        return self._LABEL_RESOURCE_SPIKE
+
+    def _build_explanation(
+        self,
+        primary_key: str,
+        primary_dev: float,
+        metric: Dict[str, Any],
+        responsible_process: Dict[str, Any],
+        duration_min: float,
+        continuous_increase: bool,
+        root_cause: str,
+    ) -> str:
+        proc_name = responsible_process.get("name", "N/A")
+        current_val = float(metric.get(primary_key, 0.0)) if primary_key in metric else None
+        metric_disp = self._display_metric_name(primary_key)
+
+        parts: List[str] = []
+
+        if current_val is not None:
+            parts.append(f"{metric_disp} is currently at {current_val:.1f}%.")
+
+        if continuous_increase and duration_min > 0:
+            parts.append(
+                f"{metric_disp} has increased continuously over the last "
+                f"~{duration_min:.0f} minute(s)."
+            )
+        elif duration_min > 0:
+            parts.append(
+                f"{metric_disp} has remained above its learned baseline for "
+                f"~{duration_min:.0f} minute(s)."
+            )
+
+        if proc_name != "N/A":
+            if root_cause == self._LABEL_MEMORY_LEAK:
+                parts.append(
+                    f"The process '{proc_name}' continuously consumed memory "
+                    f"without releasing it, consistent with a leak pattern."
+                )
+            elif root_cause == self._LABEL_RUNAWAY_PROCESS:
+                parts.append(
+                    f"The process '{proc_name}' is consuming an unusually large "
+                    f"share of CPU, consistent with a runaway or stuck process."
+                )
+            elif root_cause == self._LABEL_MULTI_HIGH_PROCESS:
+                parts.append(
+                    f"Multiple metrics deviated from baseline simultaneously, with "
+                    f"'{proc_name}' among the top resource consumers — suggesting "
+                    f"coordinated resource exhaustion rather than a single cause."
+                )
+            else:
+                parts.append(f"'{proc_name}' is the top consumer of the affected resource.")
+
+        parts.append(f"Deviation from learned baseline: {abs(primary_dev):.0f}%.")
+
+        return " ".join(parts)
+
+    def _historical_comparison_text(self, primary_key: str, primary_dev: float) -> str:
+        metric_disp = self._display_metric_name(primary_key)
+        direction = "above" if primary_dev >= 0 else "below"
+        return f"{metric_disp} is currently {abs(primary_dev):.0f}% {direction} its learned baseline."
+
+    def _build_recommendation(
+        self,
+        root_cause: str,
+        responsible_process: Dict[str, Any],
+        primary_key: str,
+    ) -> str:
+        proc_name = responsible_process.get("name", "the responsible process")
+
+        recommendations = {
+            self._LABEL_MEMORY_LEAK: (
+                f"Restart '{proc_name}' and inspect its memory allocation for a leak."
+            ),
+            self._LABEL_CPU_SATURATION: (
+                f"Reduce CPU-intensive workloads and review '{proc_name}' for "
+                f"unnecessary compute usage."
+            ),
+            self._LABEL_RUNAWAY_PROCESS: (
+                f"Terminate or restart '{proc_name}'; investigate for an infinite "
+                f"loop or stuck operation."
+            ),
+            self._LABEL_DISK_BOTTLENECK: (
+                "Check disk-intensive applications, clear temporary files or logs, "
+                "and consider expanding storage."
+            ),
+            self._LABEL_NETWORK_TRAFFIC: (
+                f"Investigate unusual network activity from '{proc_name}'; check for "
+                f"unauthorized outbound connections or possible data exfiltration."
+            ),
+            self._LABEL_TOO_MANY_PROCESSES: (
+                "Review background processes and close unnecessary ones to free up "
+                "system resources."
+            ),
+            self._LABEL_MULTI_HIGH_PROCESS: (
+                f"Investigate '{proc_name}' and other high-resource processes for "
+                f"coordinated abnormal activity, including possible malware."
+            ),
+            self._LABEL_RESOURCE_SPIKE: (
+                f"Monitor '{proc_name}' for recurring spikes; if they persist, "
+                f"inspect the process for potential malware or misconfiguration."
+            ),
+        }
+
+        return recommendations.get(
+            root_cause,
+            f"Investigate '{proc_name}' and monitor {self._display_metric_name(primary_key)} closely.",
+        )
+
+    @staticmethod
+    def _compute_confidence(prediction: AnomalyPrediction, primary_dev: float) -> float:
+        """Blend the anomaly model's confidence with deviation strength."""
+        base = prediction.confidence
+        dev_component = min(40.0, abs(primary_dev) * 0.8)
+        blended = (base * 0.6) + (dev_component + 50.0) * 0.4
+        return float(np.clip(blended, 0.0, 99.9))
+
+
+# ---------------------------------------------------------------------------
+# NEW: Explainable AI Health Score Engine
+# ---------------------------------------------------------------------------
+@dataclass
+class HealthScoreWeights:
+    """Configurable weights for the AI Health Score Engine.
+
+    Weights need not sum to exactly 1.0 — :meth:`HealthScoreEngine.compute`
+    normalizes by the total automatically — but keeping them close to 1.0
+    keeps the numbers intuitive when tuning.
+
+    Future developers can change system health scoring behavior entirely
+    by constructing ``HealthScoreEngine(parent, weights=HealthScoreWeights(...))``
+    with different values — no changes to the scoring algorithm itself
+    are required.
+
+    Attributes:
+        cpu: Weight for the CPU utilisation sub-score.
+        ram: Weight for the RAM utilisation sub-score.
+        disk: Weight for the disk utilisation sub-score.
+        network: Weight for the network throughput sub-score.
+        anomalies: Weight for the active-anomaly-severity sub-score.
+        historical: Weight for the baseline-deviation sub-score.
+    """
+    cpu:        float = 0.25
+    ram:        float = 0.25
+    disk:       float = 0.15
+    network:    float = 0.10
+    anomalies:  float = 0.15
+    historical: float = 0.10
+
+    def as_dict(self) -> Dict[str, float]:
+        """Return the weights as a plain dict (API/DB friendly)."""
+        return asdict(self)
+
+    def total(self) -> float:
+        """Return the sum of all weights, used for normalization."""
+        return sum(self.as_dict().values())
+
+
+class HealthScoreEngine:
+    """Explainable AI Health Score Engine.
+
+    Independent module recalculated every monitoring cycle. It combines
+    the current metric snapshot, the active-anomaly list, and the latest
+    Root Cause Analysis result into one weighted, human-explainable
+    health score — without duplicating the anomaly-detection scoring,
+    the Root Cause Analysis logic, or the pre-existing internal
+    ``AnomalyDetectionEngine._health_score`` bookkeeping (which continues
+    to independently drive existing recommendations/trend penalties,
+    untouched).
+
+    Attributes:
+        _parent: Read-only back-reference to the owning
+            ``AnomalyDetectionEngine``, used to read its rolling windows,
+            learned baseline, active anomalies, and Root Cause Analysis
+            engine. No state is written back to it.
+        _weights: The configurable :class:`HealthScoreWeights` in use.
+        _history: Bounded history of ``(timestamp, score)`` pairs, used to
+            compute the "vs. last hour" historical comparison.
+        _latest: The most recently computed result, or ``None``.
+    """
+
+    _STATUS_BANDS: List[Tuple[float, str]] = [
+        (90.0, "Excellent"),
+        (75.0, "Good"),
+        (60.0, "Fair"),
+        (40.0, "Poor"),
+        (0.0,  "Critical"),
+    ]
+
+    def __init__(
+        self,
+        parent_engine: "AnomalyDetectionEngine",
+        weights: Optional[HealthScoreWeights] = None,
+    ) -> None:
+        self._parent: "AnomalyDetectionEngine" = parent_engine
+        self._weights: HealthScoreWeights = weights or HealthScoreWeights()
+        # ~1 hour of history at the project's default 5s monitor interval.
+        # Approximate if MONITOR_INTERVAL is changed; documented as such.
+        self._history: deque = deque(maxlen=720)
+        self._latest: Optional[Dict[str, Any]] = None
+        self._lock: threading.Lock = threading.Lock()
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+    def compute(
+        self,
+        metric: Dict[str, Any],
+        processes: List[Dict[str, Any]],
+        prediction: AnomalyPrediction,
+    ) -> Dict[str, Any]:
+        """Compute and explain the current AI Health Score.
+
+        Intended to be called once per monitoring cycle, regardless of
+        whether an anomaly was detected on this cycle.
+
+        Args:
+            metric: The raw system metric dict for this cycle.
+            processes: The top-process snapshot for this cycle.
+            prediction: The :class:`AnomalyPrediction` for this cycle
+                (consumed only for its severity/confidence — never
+                recomputed).
+
+        Returns:
+            A database/API-friendly dict matching the documented Health
+            Score output schema (``timestamp``, ``health_score``,
+            ``status``, ``confidence``, ``contributing_factors``,
+            ``weights``, ``explanation``, ``historical_comparison``).
+        """
+        cpu = float(metric.get("cpu_percent", 0.0))
+        ram = float(metric.get("ram_percent", 0.0))
+        disk = float(metric.get("disk_percent", 0.0))
+        net = float(metric.get("net_sent_mb", 0.0)) + float(metric.get("net_recv_mb", 0.0))
+
+        cpu_sub = self._metric_subscore(cpu, config.CPU_THRESHOLD, config.CPU_THRESHOLD + 10.0)
+        ram_sub = self._metric_subscore(ram, config.RAM_THRESHOLD, config.RAM_THRESHOLD + 10.0)
+        disk_sub = self._metric_subscore(disk, 80.0, 90.0)
+        net_sub = self._metric_subscore(net, config.NETWORK_THRESHOLD, config.NETWORK_THRESHOLD * 1.5)
+
+        active_anomalies = self._parent.get_active_anomalies()
+        anomaly_sub, anomaly_summary = self._anomaly_subscore(active_anomalies)
+
+        deviations = self._parent._compute_deviations(metric)
+        historical_sub, avg_abs_deviation = self._historical_subscore(deviations)
+
+        w = self._weights
+        total_weight = w.total() or 1.0
+        weighted_score = (
+            cpu_sub * w.cpu + ram_sub * w.ram + disk_sub * w.disk +
+            net_sub * w.network + anomaly_sub * w.anomalies +
+            historical_sub * w.historical
+        ) / total_weight
+        health_score = float(np.clip(weighted_score, 0.0, 100.0))
+
+        status = self._score_to_status(health_score)
+
+        rca_latest = self._parent._rca_engine.get_latest()
+
+        contributing_factors = self._build_contributing_factors(
+            cpu, ram, disk, net, anomaly_summary, rca_latest,
+        )
+
+        explanation = self._build_explanation(
+            cpu, ram, disk, net, anomaly_summary, rca_latest, health_score, status,
+        )
+
+        confidence = self._compute_confidence()
+
+        with self._lock:
+            past_scores = [s for _, s in self._history]
+        historical_comparison = self._historical_comparison_text(health_score, past_scores)
+
+        result: Dict[str, Any] = {
+            "timestamp": prediction.timestamp,
+            "health_score": round(health_score, 1),
+            "status": status,
+            "confidence": round(confidence, 1),
+            "contributing_factors": contributing_factors,
+            "weights": w.as_dict(),
+            "explanation": explanation,
+            "historical_comparison": historical_comparison,
+        }
+
+        with self._lock:
+            self._latest = result
+            self._history.append((prediction.timestamp, health_score))
+
+        return result
+
+    def get_latest(self) -> Optional[Dict[str, Any]]:
+        """Return the most recently computed Health Score result, if any."""
+        with self._lock:
+            return dict(self._latest) if self._latest else None
+
+    def get_history(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """Return past Health Score results, most recent first.
+
+        Note: only the single most recent full result object is retained
+        verbatim (``_latest``); ``_history`` stores compact
+        ``(timestamp, score)`` pairs for trend/comparison purposes. This
+        method reconstructs lightweight entries from that compact history.
+
+        Args:
+            limit: Maximum number of results to return.
+        """
+        with self._lock:
+            items = list(self._history)
+        items.reverse()
+        return [
+            {"timestamp": ts, "health_score": round(score, 1), "status": self._score_to_status(score)}
+            for ts, score in items[:limit]
+        ]
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+    @classmethod
+    def _score_to_status(cls, score: float) -> str:
+        for threshold, label in cls._STATUS_BANDS:
+            if score >= threshold:
+                return label
+        return "Critical"
+
+    @staticmethod
+    def _metric_subscore(value: float, warn_threshold: float, danger_threshold: float) -> float:
+        """Map a raw metric value to a 0-100 sub-score using its thresholds.
+
+        Stays at 100 while comfortably below the warn threshold, glides
+        down to ~85 as it approaches it, drops steeply between warn and
+        danger, and bottoms out near 0 beyond danger.
+        """
+        if warn_threshold <= 0:
+            return 100.0
+        safe_zone = warn_threshold * 0.7
+
+        if value <= safe_zone:
+            return 100.0
+        if value <= warn_threshold:
+            frac = (value - safe_zone) / max(warn_threshold - safe_zone, 1e-6)
+            return 100.0 - frac * 15.0
+        if value <= danger_threshold:
+            frac = (value - warn_threshold) / max(danger_threshold - warn_threshold, 1e-6)
+            return 85.0 - frac * 45.0
+        overshoot = value - danger_threshold
+        return max(0.0, 40.0 - overshoot * 1.5)
+
+    @staticmethod
+    def _anomaly_subscore(active_anomalies: List[Dict[str, Any]]) -> Tuple[float, Dict[str, int]]:
+        """Score based on severity-weighted count of currently active anomalies."""
+        recent = active_anomalies[:10]
+        counts = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
+        for a in recent:
+            sev = a.get("severity", "LOW")
+            if sev in counts:
+                counts[sev] += 1
+
+        weighted = counts["CRITICAL"] * 4 + counts["HIGH"] * 2 + counts["MEDIUM"] * 1 + counts["LOW"] * 0.5
+        subscore = max(0.0, 100.0 - weighted * 10.0)
+        return subscore, counts
+
+    @staticmethod
+    def _historical_subscore(deviations: Dict[str, float]) -> Tuple[float, float]:
+        """Score based on average absolute deviation from the learned baseline."""
+        if not deviations:
+            return 100.0, 0.0
+        avg_abs_dev = float(np.mean([abs(v) for v in deviations.values()]))
+        subscore = max(0.0, 100.0 - avg_abs_dev * 1.2)
+        return subscore, avg_abs_dev
+
+    @staticmethod
+    def _compute_confidence() -> float:
+        """Confidence reflects how much monitoring data backs this score."""
+        sample_count = len(config.metrics_data)
+        if sample_count < 5:
+            return 45.0
+        if sample_count < 20:
+            return 60.0 + sample_count * 0.8
+        return float(min(99.0, 80.0 + sample_count * 0.15))
+
+    def _build_contributing_factors(
+        self,
+        cpu: float, ram: float, disk: float, net: float,
+        anomaly_summary: Dict[str, int],
+        rca_latest: Optional[Dict[str, Any]],
+    ) -> List[str]:
+        factors: List[str] = []
+
+        if cpu > config.CPU_THRESHOLD:
+            factors.append("High CPU Usage")
+        if ram > config.RAM_THRESHOLD:
+            if len(self._parent._rolling_ram) >= 3:
+                vals = list(self._parent._rolling_ram)[-3:]
+                if all(vals[i] <= vals[i + 1] for i in range(len(vals) - 1)):
+                    factors.append("Increasing RAM Usage")
+                else:
+                    factors.append("High RAM Usage")
+            else:
+                factors.append("High RAM Usage")
+        if disk > 90:
+            factors.append("Critical Disk Usage")
+        if net > config.NETWORK_THRESHOLD:
+            factors.append("Abnormal Network Activity")
+
+        total_anomalies = sum(anomaly_summary.values())
+        if total_anomalies == 1:
+            factors.append("One Active Anomaly")
+        elif total_anomalies > 1:
+            factors.append(f"{total_anomalies} Active Anomalies")
+
+        if rca_latest and rca_latest.get("root_cause"):
+            factors.append(rca_latest["root_cause"])
+
+        if not factors:
+            factors.append("All Metrics Nominal")
+
+        return factors
+
+    def _build_explanation(
+        self,
+        cpu: float, ram: float, disk: float, net: float,
+        anomaly_summary: Dict[str, int],
+        rca_latest: Optional[Dict[str, Any]],
+        health_score: float,
+        status: str,
+    ) -> str:
+        parts: List[str] = [f"Health Score is {health_score:.0f} ({status})."]
+
+        if cpu > config.CPU_THRESHOLD:
+            duration_above = sum(1 for v in self._parent._rolling_cpu if v > config.CPU_THRESHOLD)
+            dur_min = (duration_above * config.MONITOR_INTERVAL) / 60.0
+            parts.append(
+                f"CPU utilization remained above {config.CPU_THRESHOLD:.0f}% for "
+                f"approximately {dur_min:.0f} minute(s)."
+            )
+
+        if ram > config.RAM_THRESHOLD:
+            if len(self._parent._rolling_ram) >= 3:
+                vals = list(self._parent._rolling_ram)[-3:]
+                if all(vals[i] <= vals[i + 1] for i in range(len(vals) - 1)):
+                    increase = vals[-1] - vals[0]
+                    parts.append(f"RAM usage increased continuously by {increase:.0f}%.")
+                else:
+                    parts.append(f"RAM usage is elevated at {ram:.1f}%.")
+            else:
+                parts.append(f"RAM usage is elevated at {ram:.1f}%.")
+
+        high = anomaly_summary.get("HIGH", 0)
+        crit = anomaly_summary.get("CRITICAL", 0)
+        if crit > 0:
+            parts.append(f"{crit} Critical severity anomaly(ies) are currently active.")
+        if high > 0:
+            parts.append(f"{high} High severity anomaly(ies) are currently active.")
+
+        if rca_latest:
+            proc = rca_latest.get("responsible_process", {}).get("name", "N/A")
+            if proc and proc != "N/A":
+                parts.append(
+                    f"The AI Root Cause Analysis identified '{proc}' as the primary "
+                    f"contributor ({rca_latest.get('root_cause', 'unknown cause')})."
+                )
+
+        if health_score < 60:
+            parts.append(
+                "Historical comparison indicates current resource utilization is "
+                "significantly above the learned baseline, and overall system "
+                "stability has decreased."
+            )
+
+        return " ".join(parts)
+
+    def _historical_comparison_text(self, current_score: float, past_scores: List[float]) -> str:
+        if not past_scores:
+            return "Not enough history yet to compare against the last hour."
+
+        avg_past = float(np.mean(past_scores))
+        if avg_past <= 0:
+            return "Not enough history yet to compare against the last hour."
+
+        delta_pct = ((current_score - avg_past) / avg_past) * 100.0
+        direction = "higher" if delta_pct >= 0 else "lower"
+        return (
+            f"Current health is {abs(delta_pct):.0f}% {direction} than the average "
+            f"health score over the recent monitoring history."
+        )
+
+
+# ---------------------------------------------------------------------------
 # Module-level singleton (shared by main.py, api.py)
 # ---------------------------------------------------------------------------
 engine: AnomalyDetectionEngine = AnomalyDetectionEngine()
@@ -1807,3 +2607,40 @@ def save_model() -> bool:
 def load_model() -> bool:
     """Module-level convenience wrapper for :meth:`AnomalyDetectionEngine.load_model`."""
     return engine.load_model()
+
+
+def get_latest_root_cause_analysis() -> Optional[Dict[str, Any]]:
+    """Module-level convenience wrapper for
+    :meth:`AnomalyDetectionEngine.get_latest_root_cause_analysis`.
+
+    Intended for a future ``GET /ai/root-cause`` endpoint in api.py —
+    see the field list documented on :meth:`RootCauseAnalysisEngine.analyze`.
+    """
+    return engine.get_latest_root_cause_analysis()
+
+
+def get_root_cause_analysis_history(limit: int = 20) -> List[Dict[str, Any]]:
+    """Module-level convenience wrapper for
+    :meth:`AnomalyDetectionEngine.get_root_cause_analysis_history`.
+
+    Intended for a future ``GET /ai/root-cause/history`` endpoint in api.py.
+    """
+    return engine.get_root_cause_analysis_history(limit=limit)
+
+
+def get_latest_health_score() -> Optional[Dict[str, Any]]:
+    """Module-level convenience wrapper for
+    :meth:`AnomalyDetectionEngine.get_latest_health_score`.
+
+    Intended for a future ``GET /ai/health-score`` endpoint in api.py.
+    """
+    return engine.get_latest_health_score()
+
+
+def get_health_score_history(limit: int = 50) -> List[Dict[str, Any]]:
+    """Module-level convenience wrapper for
+    :meth:`AnomalyDetectionEngine.get_health_score_history`.
+
+    Intended for a future ``GET /ai/health-score/history`` endpoint in api.py.
+    """
+    return engine.get_health_score_history(limit=limit)
