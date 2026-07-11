@@ -32,7 +32,7 @@ function metricColor(val, warn = 70, danger = 85) {
 }
 
 // ─── Gauge ───────────────────────────────────────────────────────────────────
-function Gauge({ label, value, unit = '%', color = 'var(--mint)', warn = 70, danger = 85 }) {
+function Gauge({ label, value, unit = '%', color = 'var(--mint-deep)', warn = 70, danger = 85 }) {
   const R = 52; const CX = 68; const CY = 68
   const GAP = 50; const sweep = 360 - GAP
   const frac = Math.max(0, Math.min(1, (value ?? 0) / 100))
@@ -133,8 +133,8 @@ function AreaChartCard({ title, subtitle, dot, data, lines }) {
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false}/>
           <XAxis dataKey="t" tick={{ fontSize: 9, fill: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }} interval="preserveStartEnd" tickLine={false} axisLine={false}/>
           <YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false}/>
-          <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, fontFamily: 'var(--font-mono)', fontSize: 11, boxShadow: 'var(--shadow-md)' }} labelStyle={{ color: 'var(--text-muted)' }}/>
-          <Legend wrapperStyle={{ fontSize: 11, fontFamily: 'var(--font-ui)', paddingTop: 8 }}/>
+          <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, fontFamily: 'var(--font-mono)', fontSize: 11, boxShadow: 'var(--shadow-md)' }} labelStyle={{ color: 'var(--text-muted)' }} itemStyle={{ color: 'var(--text)' }}/>
+          <Legend wrapperStyle={{ fontSize: 11, fontFamily: 'var(--font-ui)', paddingTop: 8, color: 'var(--text-muted)' }}/>
           {lines.map(l => (
             <Area key={l.key} type="monotone" dataKey={l.key} name={l.name}
               stroke={l.color} strokeWidth={2} fill={`url(#grad-${l.key})`}
@@ -220,7 +220,7 @@ function RunHistory({ runs }) {
 function AIPanel({ stats, anomalies }) {
   return (
     <Card>
-      <SectionHeader title="AI Anomaly Detection" subtitle="Isolation Forest · real-time inference" dot="var(--lavender)"/>
+      <SectionHeader title="AI Anomaly Detection" subtitle="Isolation Forest · real-time inference" dot="var(--peach)"/>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 16 }}>
         {[
           { label: 'Total Detected', val: stats?.total_anomalies ?? '—', color: 'var(--lavender-deep)' },
@@ -262,11 +262,11 @@ function AIPanel({ stats, anomalies }) {
   )
 }
 
-// ─── NEW: AI Root Cause Analysis card ─────────────────────────────────────────
+// ─── AI Root Cause Analysis card ──────────────────────────────────────────────
 function RootCauseAnalysisCard({ rca }) {
   return (
     <Card>
-      <SectionHeader title="AI Root Cause Analysis" subtitle="Explainable AI · why the anomaly happened" dot="var(--rose)"/>
+      <SectionHeader title="AI Root Cause Analysis" subtitle="Explainable AI · why the anomaly happened" dot="var(--peach)"/>
 
       {!rca
         ? <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px 0', fontSize: 13 }}>
@@ -277,7 +277,7 @@ function RootCauseAnalysisCard({ rca }) {
               <span style={{ background: severityBg(rca.severity), color: severityColor(rca.severity), borderRadius: 20, padding: '3px 12px', fontSize: 11, fontWeight: 700 }}>
                 {rca.severity}
               </span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: 'var(--rose-deep)' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: 'var(--peach-deep)' }}>
                 {rca.root_cause}
               </span>
               <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>
@@ -296,7 +296,7 @@ function RootCauseAnalysisCard({ rca }) {
               </div>
               <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '12px 14px' }}>
                 <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>Responsible Process</div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 600, color: 'var(--peach-deep)' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 600, color: 'var(--coral-deep)' }}>
                   {rca.responsible_process?.name ?? 'N/A'}
                   {rca.responsible_process?.pid >= 0 &&
                     <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}> · pid {rca.responsible_process.pid}</span>}
@@ -322,8 +322,8 @@ function RootCauseAnalysisCard({ rca }) {
               <div style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.5 }}>{rca.historical_comparison}</div>
             </div>
 
-            <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', borderLeft: '3px solid var(--rose-deep)' }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--rose-deep)', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 4 }}>Recommendation</div>
+            <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', borderLeft: '3px solid var(--peach-deep)' }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--peach-deep)', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 4 }}>Recommendation</div>
               <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5 }}>{rca.recommendation}</div>
             </div>
           </>
@@ -332,7 +332,7 @@ function RootCauseAnalysisCard({ rca }) {
   )
 }
 
-// ─── NEW: AI Health Score card (circular gauge + explanation) ────────────────
+// ─── AI Health Score card (circular gauge + explanation) ─────────────────────
 function HealthScoreGauge({ score, status }) {
   const R = 62; const CX = 76; const CY = 76
   const GAP = 50; const sweep = 360 - GAP
@@ -352,7 +352,7 @@ function HealthScoreGauge({ score, status }) {
 
   const statusColors = {
     Excellent: 'var(--mint-deep)',
-    Good:      'var(--sage-deep)',
+    Good:      'var(--olive-deep)',
     Fair:      'var(--peach-deep)',
     Poor:      'var(--coral-deep)',
     Critical:  'var(--rose-deep)',
@@ -376,7 +376,7 @@ function HealthScoreGauge({ score, status }) {
 function HealthScoreCard({ health }) {
   return (
     <Card>
-      <SectionHeader title="AI Health Score" subtitle="Explainable AI · weighted composite score" dot="var(--lavender)"/>
+      <SectionHeader title="AI Health Score" subtitle="Explainable AI · weighted composite score" dot="var(--peach)"/>
 
       {!health
         ? <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px 0', fontSize: 13 }}>
@@ -421,12 +421,12 @@ function HealthScoreCard({ health }) {
   )
 }
 
-// ─── NEW: AI Recommendations card ─────────────────────────────────────────────
+// ─── AI Recommendations card ──────────────────────────────────────────────────
 function SmartRecommendationsCard({ recommendations }) {
   const list = recommendations || []
   return (
     <Card>
-      <SectionHeader title="AI Recommendations" subtitle="Explainable AI · prioritized, metric-referenced advice" dot="var(--olive)"/>
+      <SectionHeader title="AI Recommendations" subtitle="Explainable AI · prioritized, metric-referenced advice" dot="var(--peach)"/>
 
       {list.length === 0
         ? <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px 0', fontSize: 13 }}>
@@ -458,7 +458,7 @@ function SmartRecommendationsCard({ recommendations }) {
   )
 }
 
-// ─── NEW: AI Trend Analysis card ──────────────────────────────────────────────
+// ─── AI Trend Analysis card ───────────────────────────────────────────────────
 function TrendAnalysisCard({ trends }) {
   const list = trends || []
   return (
@@ -496,12 +496,12 @@ function TrendAnalysisCard({ trends }) {
   )
 }
 
-// ─── NEW: AI Predictive Alerts card ───────────────────────────────────────────
+// ─── AI Predictive Alerts card ────────────────────────────────────────────────
 function PredictiveAlertsCard({ alerts }) {
   const list = alerts || []
   return (
     <Card>
-      <SectionHeader title="AI Predictive Alerts" subtitle="Explainable AI · forecasted issues, not yet occurred" dot="var(--coral)"/>
+      <SectionHeader title="AI Predictive Alerts" subtitle="Explainable AI · forecasted issues, not yet occurred" dot="var(--peach)"/>
 
       {list.length === 0
         ? <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px 0', fontSize: 13 }}>
@@ -514,7 +514,7 @@ function PredictiveAlertsCard({ alerts }) {
                   <span style={{ background: severityBg(a.predicted_severity), color: severityColor(a.predicted_severity), borderRadius: 20, padding: '2px 10px', fontSize: 10, fontWeight: 700 }}>
                     {a.predicted_severity}
                   </span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: 'var(--coral-deep)' }}>{a.predicted_issue}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: 'var(--peach-deep)' }}>{a.predicted_issue}</span>
                   <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>
                     ETA {a.estimated_time_until}
                   </span>
@@ -526,7 +526,7 @@ function PredictiveAlertsCard({ alerts }) {
                   <span>Confidence: <b style={{ color: 'var(--text)' }}>{fmt(a.confidence)}%</b></span>
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 4 }}>Likely cause: {a.root_cause_likelihood}</div>
-                <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', fontSize: 12, color: 'var(--text)', borderLeft: '3px solid var(--coral-deep)' }}>
+                <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', fontSize: 12, color: 'var(--text)', borderLeft: '3px solid var(--peach-deep)' }}>
                   {a.recommended_action}
                 </div>
               </div>
@@ -709,19 +709,19 @@ export default function App() {
         {/* AI PANEL */}
         <AIPanel stats={aiStats} anomalies={anomalies}/>
 
-        {/* NEW: AI ROOT CAUSE ANALYSIS */}
+        {/* AI ROOT CAUSE ANALYSIS */}
         <RootCauseAnalysisCard rca={rca}/>
 
-        {/* NEW: AI HEALTH SCORE */}
+        {/* AI HEALTH SCORE */}
         <HealthScoreCard health={health}/>
 
-        {/* NEW: AI RECOMMENDATIONS */}
+        {/* AI RECOMMENDATIONS */}
         <SmartRecommendationsCard recommendations={smartRecs}/>
 
-        {/* NEW: AI TREND ANALYSIS */}
+        {/* AI TREND ANALYSIS */}
         <TrendAnalysisCard trends={trendAnalysis}/>
 
-        {/* NEW: AI PREDICTIVE ALERTS */}
+        {/* AI PREDICTIVE ALERTS */}
         <PredictiveAlertsCard alerts={predictiveAlerts}/>
 
       </main>
@@ -732,21 +732,21 @@ export default function App() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const S = {
   root: { minHeight: '100vh', display: 'flex', flexDirection: 'column', animation: 'fadeIn 0.3s ease' },
-  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 28px', background: 'linear-gradient(90deg, #C9B8E0 0%, #C9A8D0 50%, #B8C98A 100%)', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, zIndex: 10, boxShadow: 'var(--shadow)' },
+  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 28px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, zIndex: 10, boxShadow: 'var(--shadow)' },
   headerTitle: { fontWeight: 700, fontSize: 15, color: 'var(--text)' },
-  logoMark: { width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #8B7CC8 0%, #C6399C 50%, #6A9040 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700 },
+  logoMark: { width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, var(--lavender-deep) 0%, var(--peach-deep) 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, boxShadow: 'var(--shadow-brand)' },
   main: { padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1400, width: '100%', margin: '0 auto' },
-  errorBanner: { background: 'var(--peach)', borderBottom: '1px solid var(--coral)', color: 'var(--peach-deep)', padding: '10px 28px', fontSize: 13, fontFamily: 'var(--font-mono)' },
+  errorBanner: { background: 'var(--rose)', borderBottom: '1px solid var(--rose-deep)', color: 'var(--rose-deep)', padding: '10px 28px', fontSize: 13, fontFamily: 'var(--font-mono)' },
   gaugeRow: { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14 },
-  gaugeCard: { background: 'linear-gradient(145deg, #EDE8F8 0%, #F5DCE8 50%, #E0EDD0 100%)', borderRadius: 'var(--radius)', padding: '20px 16px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, boxShadow: 'var(--shadow)', border: '1px solid var(--border)' },
+  gaugeCard: { background: 'var(--surface)', borderRadius: 'var(--radius)', padding: '20px 16px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, boxShadow: 'var(--shadow)', border: '1px solid var(--border)' },
   gaugeLabel: { fontWeight: 600, fontSize: 12, letterSpacing: 0.8, color: 'var(--text-dim)', textTransform: 'uppercase' },
   badge: { borderRadius: 20, padding: '2px 10px', fontSize: 10, fontWeight: 700, letterSpacing: 0.5 },
   strip: { display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 1, background: 'var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden', boxShadow: 'var(--shadow)' },
-  stripItem: { background: 'linear-gradient(160deg, #EAE5F5 0%, #F2DCE8 50%, #DDE8CC 100%)', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 4 },
+  stripItem: { background: 'var(--surface)', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 4 },
   stripLabel: { fontSize: 10, fontWeight: 600, letterSpacing: 0.8, color: 'var(--text-muted)', textTransform: 'uppercase' },
   stripVal: { fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 600 },
   chartRow: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 },
-  card: { background: 'linear-gradient(150deg, #EAE5F5 0%, #F2DCE8 50%, #DDE8CC 100%)', borderRadius: 'var(--radius)', padding: '20px 22px', boxShadow: 'var(--shadow)', border: '1px solid var(--border)' },
+  card: { background: 'var(--surface)', borderRadius: 'var(--radius)', padding: '20px 22px', boxShadow: 'var(--shadow)', border: '1px solid var(--border)' },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: { textAlign: 'left', padding: '8px 12px', fontSize: 10, fontWeight: 700, letterSpacing: 0.8, color: 'var(--text-muted)', textTransform: 'uppercase', borderBottom: '1px solid var(--border)' },
   td: { padding: '10px 12px', fontSize: 13, borderBottom: '1px solid var(--border)', color: 'var(--text)' },
