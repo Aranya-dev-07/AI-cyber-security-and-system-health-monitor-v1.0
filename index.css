@@ -87,3 +87,183 @@ html, body, #root {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AppShell layout — persistent sidebar + topbar + dynamic workspace
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.shell__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  margin-left: 264px;
+  transition: margin-left 0.25s ease;
+}
+.shell--collapsed .shell__body { margin-left: 76px; }
+
+.shell__workspace {
+  padding: 24px 28px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.workspace-fade { animation: fadeIn 0.25s ease; }
+
+.shell__scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 15;
+  display: none;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 264px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  transition: width 0.25s ease;
+  overflow: hidden;
+}
+.sidebar--collapsed { width: 76px; }
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar__logo {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--lavender-deep) 0%, var(--peach-deep) 100%);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-brand);
+}
+.sidebar__title { font-weight: 700; font-size: 14px; color: var(--text); white-space: nowrap; }
+.sidebar__subtitle { font-size: 11px; color: var(--text-muted); white-space: nowrap; margin-top: 1px; }
+
+.sidebar__nav { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 14px 10px; }
+.sidebar__group { margin-bottom: 18px; }
+.sidebar__group-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--text-muted); padding: 0 10px 6px; white-space: nowrap;
+}
+.sidebar__group-label--accent { color: var(--peach-deep); }
+
+.sidebar__link {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 10px; margin-bottom: 2px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px; font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.sidebar__link:hover { background: var(--surface-2); color: var(--text); }
+.sidebar__link--active { background: rgba(167,139,250,0.14); color: var(--lavender-deep); font-weight: 600; }
+.sidebar__link-icon { display: flex; flex-shrink: 0; width: 18px; height: 18px; }
+
+.sidebar__collapse-btn {
+  display: flex; align-items: center; justify-content: center;
+  margin: 4px 10px 10px; padding: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.sidebar__collapse-btn:hover { background: var(--surface-2); color: var(--text); }
+
+/* ── Sidebar footer (status indicators) ─────────────────────────────── */
+.sidebar-footer {
+  border-top: 1px solid var(--border);
+  padding: 10px;
+  display: flex; flex-direction: column; gap: 1px;
+  flex-shrink: 0;
+}
+.sidebar-footer__row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 5px 8px; font-size: 11px;
+}
+.sidebar-footer__row--collapsed { justify-content: center; padding: 6px 0; }
+.sidebar-footer__label { color: var(--text-muted); font-weight: 500; }
+.sidebar-footer__value {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--text-dim); font-family: var(--font-mono); font-weight: 500;
+}
+.sidebar-footer__dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Topbar ──────────────────────────────────────────────────────────── */
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.topbar__left { display: flex; align-items: center; gap: 14px; }
+.topbar__menu-btn {
+  display: none;
+  background: transparent; border: none; color: var(--text);
+  font-size: 18px; cursor: pointer; padding: 4px;
+}
+.topbar__title { font-weight: 700; font-size: 15px; color: var(--text); }
+.topbar__subtitle { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.topbar__right { display: flex; align-items: center; gap: 14px; }
+.topbar__updated { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); }
+
+/* ── Reusable responsive grid utilities ─────────────────────────────── */
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.health-score-layout { display: grid; grid-template-columns: 160px 1fr; gap: 20px; align-items: start; }
+
+/* ── Responsive breakpoints ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    width: 264px !important;
+  }
+  .sidebar--mobile-open { transform: translateX(0); }
+  .shell__body { margin-left: 0 !important; }
+  .topbar__menu-btn { display: inline-flex; align-items: center; justify-content: center; }
+  .shell__scrim { display: block; }
+  .sidebar__collapse-btn { display: none; }
+  .shell__workspace { padding: 18px 16px; }
+}
+
+@media (max-width: 720px) {
+  .grid-4 { grid-template-columns: repeat(2,1fr); }
+  .grid-3 { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .health-score-layout { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .grid-4 { grid-template-columns: 1fr; }
+  .topbar { padding: 12px 16px; }
+}
