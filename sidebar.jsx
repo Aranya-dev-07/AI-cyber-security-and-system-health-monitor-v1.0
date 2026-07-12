@@ -7,7 +7,7 @@ const NAV_GROUPS = [
     label: 'Monitoring',
     items: [
       { to: '/', label: 'Overview', icon: 'grid', end: true },
-      { to: '/processes', label: 'Processes', icon: 'list' },
+      { to: '/monitoring', label: 'Monitoring Workspace', icon: 'activity' },
       { to: '/runs', label: 'Run History', icon: 'clock' },
     ],
   },

@@ -52,6 +52,7 @@ export function SystemStatusProvider({ children }) {
   const [smartRecs, setSmartRecs] = useState([])
   const [insights, setInsights] = useState(null)
   const [timeline, setTimeline] = useState([])
+  const [summary, setSummary] = useState(null)
 
   // null = unknown (not polled yet), otherwise boolean
   const [dbOnline, setDbOnline] = useState(null)
@@ -138,6 +139,11 @@ export function SystemStatusProvider({ children }) {
     try { setInsights((await axios.get(`${API}/ai/insights`)).data) } catch { /* not available yet */ }
     try { setTimeline((await axios.get(`${API}/ai/timeline?limit=20`)).data) } catch { /* not available yet */ }
 
+    // Run summary — used by the Monitoring Workspace's Controls tab.
+    // Existing /summary endpoint (config.generate_run_summary), 404s until
+    // a run has produced at least one metric.
+    try { setSummary((await axios.get(`${API}/summary`)).data) } catch { setSummary(null) }
+
     setLastPoll(new Date())
   }, [])
 
@@ -158,7 +164,7 @@ export function SystemStatusProvider({ children }) {
   const value = {
     metric, procs, runs, history, healthy, lastPoll, error,
     aiStats, anomalies, rca, health, trendAnalysis, predictiveAlerts, smartRecs,
-    insights, timeline,
+    insights, timeline, summary,
     status,
   }
 

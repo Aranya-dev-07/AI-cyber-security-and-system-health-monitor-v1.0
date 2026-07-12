@@ -70,6 +70,19 @@ const PATHS = {
       <polyline points="3,17.5 12,22.5 21,17.5"/>
     </>
   ),
+  activity: (
+    <polyline points="2,13 7,13 9.5,6 13,19 15.5,13 22,13"/>
+  ),
+  sliders: (
+    <>
+      <line x1="5" y1="4" x2="5" y2="20"/>
+      <circle cx="5" cy="9" r="2.1" fill="currentColor" stroke="none"/>
+      <line x1="12" y1="4" x2="12" y2="20"/>
+      <circle cx="12" cy="15" r="2.1" fill="currentColor" stroke="none"/>
+      <line x1="19" y1="4" x2="19" y2="20"/>
+      <circle cx="19" cy="7" r="2.1" fill="currentColor" stroke="none"/>
+    </>
+  ),
 }
 
 export function NavIcon({ name }) {

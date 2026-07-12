@@ -4,7 +4,10 @@ import { StatusPill, LiveClock } from './ui'
 
 const PAGE_TITLES = {
   '/': ['Overview', 'Executive summary of system status'],
-  '/processes': ['Processes', 'Top resource-consuming processes'],
+  '/monitoring/live-metrics': ['Monitoring Workspace', 'Live Metrics'],
+  '/monitoring/processes': ['Monitoring Workspace', 'Process Monitoring'],
+  '/monitoring/graphs': ['Monitoring Workspace', 'Graphs'],
+  '/monitoring/controls': ['Monitoring Workspace', 'Controls'],
   '/runs': ['Run History', 'Past monitoring sessions'],
   '/ai/anomalies': ['Anomaly Detection', 'Isolation Forest · real-time inference'],
   '/ai/workspace/health-score': ['Trinetra AI Workspace', 'AI Health Score'],

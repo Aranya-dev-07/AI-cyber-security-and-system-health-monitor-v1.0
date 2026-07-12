@@ -302,6 +302,7 @@ html, body, #root {
 }
 .ai-workspace-tab:hover { background: var(--surface-2); color: var(--text-dim); }
 .ai-workspace-tab--active { background: var(--peach); color: var(--peach-deep); }
+.ai-workspace-tab--lavender.ai-workspace-tab--active { background: var(--lavender); color: var(--lavender-deep); }
 .ai-workspace-tab__icon {
   display: flex; align-items: center; justify-content: center;
   width: 30px; height: 30px; flex-shrink: 0;

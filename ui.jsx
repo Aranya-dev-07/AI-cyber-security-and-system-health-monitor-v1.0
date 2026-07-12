@@ -91,6 +91,33 @@ export function Gauge({ label, value, unit = '%', color = 'var(--mint-deep)', wa
   )
 }
 
+// ─── SearchInput ─────────────────────────────────────────────────────────
+export function SearchInput({ value, onChange, placeholder = 'Search…' }) {
+  return (
+    <div className="search-input">
+      <span className="search-input__icon"><NavIconInline/></span>
+      <input
+        type="text"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="search-input__field"
+      />
+      {value && (
+        <button type="button" className="search-input__clear" onClick={() => onChange('')} aria-label="Clear search">×</button>
+      )}
+    </div>
+  )
+}
+function NavIconInline() {
+  return (
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="10.5" cy="10.5" r="6.5"/>
+      <line x1="15.5" y1="15.5" x2="20.5" y2="20.5"/>
+    </svg>
+  )
+}
+
 // ─── ConfidenceBar ───────────────────────────────────────────────────────
 export function ConfidenceBar({ value, color = 'var(--lavender-deep)' }) {
   const v = Math.max(0, Math.min(100, value ?? 0))
