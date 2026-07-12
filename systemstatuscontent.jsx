@@ -50,6 +50,8 @@ export function SystemStatusProvider({ children }) {
   const [trendAnalysis, setTrendAnalysis] = useState([])
   const [predictiveAlerts, setPredictiveAlerts] = useState([])
   const [smartRecs, setSmartRecs] = useState([])
+  const [insights, setInsights] = useState(null)
+  const [timeline, setTimeline] = useState([])
 
   // null = unknown (not polled yet), otherwise boolean
   const [dbOnline, setDbOnline] = useState(null)
@@ -130,6 +132,12 @@ export function SystemStatusProvider({ children }) {
     try { setPredictiveAlerts((await axios.get(`${API}/ai/predictive-alerts`)).data) } catch { /* not available yet */ }
     try { setSmartRecs((await axios.get(`${API}/ai/smart-recommendations`)).data) } catch { /* not available yet */ }
 
+    // AI Executive Summary (natural-language) + system event timeline —
+    // both already existed as endpoints in api.py, just not previously
+    // consumed by any page. Used by the Overview landing page (phase 2).
+    try { setInsights((await axios.get(`${API}/ai/insights`)).data) } catch { /* not available yet */ }
+    try { setTimeline((await axios.get(`${API}/ai/timeline?limit=20`)).data) } catch { /* not available yet */ }
+
     setLastPoll(new Date())
   }, [])
 
@@ -150,6 +158,7 @@ export function SystemStatusProvider({ children }) {
   const value = {
     metric, procs, runs, history, healthy, lastPoll, error,
     aiStats, anomalies, rca, health, trendAnalysis, predictiveAlerts, smartRecs,
+    insights, timeline,
     status,
   }
 

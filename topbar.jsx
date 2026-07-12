@@ -3,7 +3,7 @@ import { useSystemStatus } from '../context/SystemStatusContext'
 import { StatusPill, LiveClock } from './ui'
 
 const PAGE_TITLES = {
-  '/': ['Overview', 'Real-time system metrics'],
+  '/': ['Overview', 'Executive summary of system status'],
   '/processes': ['Processes', 'Top resource-consuming processes'],
   '/runs': ['Run History', 'Past monitoring sessions'],
   '/ai/anomalies': ['Anomaly Detection', 'Isolation Forest · real-time inference'],

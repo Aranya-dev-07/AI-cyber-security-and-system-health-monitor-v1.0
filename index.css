@@ -241,6 +241,29 @@ html, body, #root {
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .health-score-layout { display: grid; grid-template-columns: 160px 1fr; gap: 20px; align-items: start; }
 
+/* ── Quick Action tiles (Dashboard landing page) ─────────────────────── */
+.quick-action-tile {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.quick-action-tile:hover {
+  background: var(--surface-3);
+  border-color: var(--border-2);
+  transform: translateY(-1px);
+}
+.quick-action-tile__icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; flex-shrink: 0;
+  border-radius: 9px;
+  background: var(--peach);
+  color: var(--peach-deep);
+}
+
 /* ── Responsive breakpoints ──────────────────────────────────────────── */
 @media (max-width: 900px) {
   .sidebar {
@@ -261,6 +284,7 @@ html, body, #root {
   .grid-3 { grid-template-columns: 1fr; }
   .grid-2 { grid-template-columns: 1fr; }
   .health-score-layout { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .responsive-2fr-1fr { grid-template-columns: 1fr !important; }
 }
 
 @media (max-width: 480px) {
