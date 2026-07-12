@@ -1,5 +1,5 @@
 import { useSystemStatus } from '../../context/SystemStatusContext'
-import { Card, SectionHeader, fmt, severityColor, severityBg } from '../../components/ui'
+import { Card, SectionHeader, fmt, severityColor, severityBg, ConfidenceBar } from '../../components/ui'
 
 export default function Recommendations() {
   const { smartRecs } = useSystemStatus()
@@ -20,10 +20,11 @@ export default function Recommendations() {
                   <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--olive-deep)', fontWeight: 600 }}>{r.estimated_urgency}</span>
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5, marginBottom: 6 }}>{r.recommendation}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: 6 }}>{r.reason}</div>
-                <div style={{ display: 'flex', gap: 16, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)', flexWrap: 'wrap' }}>
-                  <span>Impact: <b style={{ color: 'var(--text)' }}>{r.expected_impact}</b></span>
-                  <span>Confidence: <b style={{ color: 'var(--text)' }}>{fmt(r.confidence)}%</b></span>
+                <div style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: 10 }}>{r.reason}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>Impact: <b style={{ color: 'var(--text)', fontFamily: 'var(--font-mono)' }}>{r.expected_impact}</b></div>
+                <div>
+                  <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: 0.6, textTransform: 'uppercase', marginBottom: 4 }}>AI Confidence</div>
+                  <ConfidenceBar value={r.confidence} color={severityColor(r.priority)}/>
                 </div>
               </div>
             ))}

@@ -7,9 +7,9 @@ const PAGE_TITLES = {
   '/processes': ['Processes', 'Top resource-consuming processes'],
   '/runs': ['Run History', 'Past monitoring sessions'],
   '/ai/anomalies': ['Anomaly Detection', 'Isolation Forest · real-time inference'],
-  '/ai/root-cause': ['Root Cause Analysis', 'Explainable AI · why the anomaly happened'],
-  '/ai/health-score': ['Health Score', 'Explainable AI · weighted composite score'],
-  '/ai/recommendations': ['Recommendations', 'Explainable AI · prioritized advice'],
+  '/ai/workspace/health-score': ['Trinetra AI Workspace', 'AI Health Score'],
+  '/ai/workspace/root-cause': ['Trinetra AI Workspace', 'Root Cause Analysis'],
+  '/ai/workspace/recommendations': ['Trinetra AI Workspace', 'AI Recommendations'],
   '/ai/trends': ['Trend Analysis', 'Sustained trends vs. temporary spikes'],
   '/ai/predictive': ['Predictive Alerts', 'Forecasted issues, not yet occurred'],
 }

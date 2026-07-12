@@ -91,6 +91,19 @@ export function Gauge({ label, value, unit = '%', color = 'var(--mint-deep)', wa
   )
 }
 
+// ─── ConfidenceBar ───────────────────────────────────────────────────────
+export function ConfidenceBar({ value, color = 'var(--lavender-deep)' }) {
+  const v = Math.max(0, Math.min(100, value ?? 0))
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ flex: 1, height: 5, borderRadius: 3, background: 'var(--border)', overflow: 'hidden' }}>
+        <div style={{ width: `${v}%`, height: '100%', borderRadius: 3, background: color, transition: 'width 0.6s ease' }}/>
+      </div>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, color, flexShrink: 0 }}>{fmt(value)}%</span>
+    </div>
+  )
+}
+
 // ─── StatusPill ──────────────────────────────────────────────────────────
 export function StatusPill({ healthy }) {
   return (

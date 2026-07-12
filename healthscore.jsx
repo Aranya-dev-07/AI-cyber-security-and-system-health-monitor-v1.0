@@ -1,5 +1,5 @@
 import { useSystemStatus } from '../../context/SystemStatusContext'
-import { Card, SectionHeader, fmt, fmtT } from '../../components/ui'
+import { Card, SectionHeader, fmt, fmtT, ConfidenceBar } from '../../components/ui'
 
 function HealthScoreGauge({ score, status }) {
   const R = 62; const CX = 76; const CY = 76
@@ -53,8 +53,11 @@ export default function HealthScore() {
         : <div className="health-score-layout">
             <div>
               <HealthScoreGauge score={health.health_score} status={health.status}/>
-              <div style={{ textAlign: 'center', marginTop: 6, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>Confidence {fmt(health.confidence)}%</div>
-              <div style={{ textAlign: 'center', marginTop: 2, fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)' }}>Updated {fmtT(health.timestamp)}</div>
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: 0.6, textTransform: 'uppercase', marginBottom: 4, textAlign: 'center' }}>Confidence</div>
+                <ConfidenceBar value={health.confidence} color="var(--peach-deep)"/>
+              </div>
+              <div style={{ textAlign: 'center', marginTop: 8, fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)' }}>Updated {fmtT(health.timestamp)}</div>
             </div>
 
             <div>

@@ -264,6 +264,55 @@ html, body, #root {
   color: var(--peach-deep);
 }
 
+/* ── Trinetra AI Workspace (local nav, independent of global sidebar) ─── */
+.ai-workspace-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.ai-workspace-header__icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--peach);
+  color: var(--peach-deep);
+}
+.ai-workspace-header__eyebrow { font-weight: 700; font-size: 14px; color: var(--text); }
+.ai-workspace-header__desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.ai-workspace-tabs {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.ai-workspace-tab {
+  display: flex; align-items: center; gap: 10px;
+  flex: 1; min-width: 200px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: var(--text-muted);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.ai-workspace-tab:hover { background: var(--surface-2); color: var(--text-dim); }
+.ai-workspace-tab--active { background: var(--peach); color: var(--peach-deep); }
+.ai-workspace-tab__icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; flex-shrink: 0;
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: inherit;
+}
+.ai-workspace-tab--active .ai-workspace-tab__icon { background: rgba(255,255,255,0.18); }
+.ai-workspace-tab__label { font-size: 13px; font-weight: 600; color: inherit; }
+.ai-workspace-tab__desc { font-size: 10.5px; color: inherit; opacity: 0.75; margin-top: 1px; }
+
 /* ── Responsive breakpoints ──────────────────────────────────────────── */
 @media (max-width: 900px) {
   .sidebar {
@@ -285,6 +334,7 @@ html, body, #root {
   .grid-2 { grid-template-columns: 1fr; }
   .health-score-layout { grid-template-columns: 1fr; justify-items: center; text-align: center; }
   .responsive-2fr-1fr { grid-template-columns: 1fr !important; }
+  .ai-workspace-tab { min-width: 100%; }
 }
 
 @media (max-width: 480px) {

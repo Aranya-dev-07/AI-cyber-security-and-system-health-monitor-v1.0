@@ -16,9 +16,7 @@ const NAV_GROUPS = [
     accent: true,
     items: [
       { to: '/ai/anomalies', label: 'Anomaly Detection', icon: 'alert' },
-      { to: '/ai/root-cause', label: 'Root Cause Analysis', icon: 'search' },
-      { to: '/ai/health-score', label: 'Health Score', icon: 'gauge' },
-      { to: '/ai/recommendations', label: 'Recommendations', icon: 'bulb' },
+      { to: '/ai/workspace', label: 'AI Workspace', icon: 'layers' },
       { to: '/ai/trends', label: 'Trend Analysis', icon: 'trend' },
       { to: '/ai/predictive', label: 'Predictive Alerts', icon: 'radar' },
     ],

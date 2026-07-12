@@ -1,5 +1,5 @@
 import { useSystemStatus } from '../../context/SystemStatusContext'
-import { Card, SectionHeader, fmt, fmtT, severityColor, severityBg } from '../../components/ui'
+import { Card, SectionHeader, fmt, fmtT, severityColor, severityBg, ConfidenceBar } from '../../components/ui'
 
 export default function RootCause() {
   const { rca } = useSystemStatus()
@@ -24,7 +24,8 @@ export default function RootCause() {
               </div>
               <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '12px 14px' }}>
                 <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>Confidence</div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 600, color: 'var(--mint-deep)' }}>{fmt(rca.confidence)}%</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 15, fontWeight: 600, color: 'var(--mint-deep)', marginBottom: 6 }}>{fmt(rca.confidence)}%</div>
+                <ConfidenceBar value={rca.confidence} color="var(--mint-deep)"/>
               </div>
               <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '12px 14px' }}>
                 <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 6 }}>Responsible Process</div>

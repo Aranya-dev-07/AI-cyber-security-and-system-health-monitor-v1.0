@@ -63,6 +63,13 @@ const PATHS = {
       <line x1="12" y1="12" x2="18" y2="7"/>
     </>
   ),
+  layers: (
+    <>
+      <polygon points="12,3 21,8 12,13 3,8"/>
+      <polyline points="3,13 12,18 21,13"/>
+      <polyline points="3,17.5 12,22.5 21,17.5"/>
+    </>
+  ),
 }
 
 export function NavIcon({ name }) {
