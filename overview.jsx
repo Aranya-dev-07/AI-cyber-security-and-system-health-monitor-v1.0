@@ -117,7 +117,7 @@ function HealthOverview({ health }) {
 // ─── Quick Actions ───────────────────────────────────────────────────────
 const QUICK_ACTIONS = [
   { to: '/monitoring/processes',        label: 'Processes',            desc: 'Top resource consumers', icon: 'list' },
-  { to: '/runs',                        label: 'Run History',          desc: 'Past monitoring sessions', icon: 'clock' },
+  { to: '/reports/test-runs',           label: 'Run History',          desc: 'Past monitoring sessions', icon: 'clock' },
   { to: '/ai/workspace/anomalies',      label: 'Anomaly Detection',    desc: 'Isolation Forest inference', icon: 'alert' },
   { to: '/ai/workspace/root-cause',     label: 'Root Cause Analysis',  desc: 'Why anomalies happened', icon: 'search' },
   { to: '/ai/workspace/recommendations',label: 'Recommendations',      desc: 'Prioritized AI advice', icon: 'bulb' },

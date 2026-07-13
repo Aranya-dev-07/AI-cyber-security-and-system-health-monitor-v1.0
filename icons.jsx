@@ -83,6 +83,20 @@ const PATHS = {
       <circle cx="19" cy="7" r="2.1" fill="currentColor" stroke="none"/>
     </>
   ),
+  file: (
+    <>
+      <path d="M6 2h9l5 5v15H6z"/>
+      <polyline points="15,2 15,7 20,7"/>
+      <line x1="9" y1="13" x2="16" y2="13"/>
+      <line x1="9" y1="17" x2="16" y2="17"/>
+    </>
+  ),
+  gear: (
+    <>
+      <circle cx="12" cy="12" r="3.2"/>
+      <path d="M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>
+    </>
+  ),
 }
 
 export function NavIcon({ name }) {

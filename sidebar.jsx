@@ -8,7 +8,6 @@ const NAV_GROUPS = [
     items: [
       { to: '/', label: 'Overview', icon: 'grid', end: true },
       { to: '/monitoring', label: 'Monitoring Workspace', icon: 'activity' },
-      { to: '/runs', label: 'Run History', icon: 'clock' },
     ],
   },
   {
@@ -16,6 +15,13 @@ const NAV_GROUPS = [
     accent: true,
     items: [
       { to: '/ai/workspace', label: 'AI Workspace', icon: 'layers' },
+    ],
+  },
+  {
+    label: 'Workspace',
+    items: [
+      { to: '/reports', label: 'Reports', icon: 'file' },
+      { to: '/settings', label: 'Settings', icon: 'gear' },
     ],
   },
 ]

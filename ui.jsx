@@ -118,6 +118,34 @@ export function EventTimeline({ events }) {
   )
 }
 
+// ─── Toggle ──────────────────────────────────────────────────────────────
+export function Toggle({ checked, onChange, label, desc }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '12px 0' }}>
+      <div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{label}</div>
+        {desc && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{desc}</div>}
+      </div>
+      <button
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        style={{
+          width: 40, height: 22, borderRadius: 20, flexShrink: 0, border: 'none', cursor: 'pointer',
+          background: checked ? 'var(--lavender-deep)' : 'var(--border-2)',
+          position: 'relative', transition: 'background 0.2s ease',
+        }}
+      >
+        <span style={{
+          position: 'absolute', top: 2, left: checked ? 20 : 2,
+          width: 18, height: 18, borderRadius: '50%', background: '#fff',
+          transition: 'left 0.2s ease', boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
+        }}/>
+      </button>
+    </div>
+  )
+}
+
 // ─── SearchInput ─────────────────────────────────────────────────────────
 export function SearchInput({ value, onChange, placeholder = 'Search…' }) {
   return (

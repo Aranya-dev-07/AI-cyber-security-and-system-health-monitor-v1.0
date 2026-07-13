@@ -8,13 +8,20 @@ const PAGE_TITLES = {
   '/monitoring/processes': ['Monitoring Workspace', 'Process Monitoring'],
   '/monitoring/graphs': ['Monitoring Workspace', 'Graphs'],
   '/monitoring/controls': ['Monitoring Workspace', 'Controls'],
-  '/runs': ['Run History', 'Past monitoring sessions'],
   '/ai/workspace/anomalies': ['Trinetra AI Workspace', 'Anomaly Detection'],
   '/ai/workspace/root-cause': ['Trinetra AI Workspace', 'Root Cause Analysis'],
   '/ai/workspace/health-score': ['Trinetra AI Workspace', 'AI Health Score'],
   '/ai/workspace/trends': ['Trinetra AI Workspace', 'Trend Analysis'],
   '/ai/workspace/predictive': ['Trinetra AI Workspace', 'Predictive Alerts'],
   '/ai/workspace/recommendations': ['Trinetra AI Workspace', 'AI Recommendations'],
+  '/reports/test-runs': ['Reports Workspace', 'Test Runs'],
+  '/reports/ai-reports': ['Reports Workspace', 'AI Reports'],
+  '/reports/export': ['Reports Workspace', 'Export'],
+  '/settings/monitoring': ['Settings Workspace', 'Monitoring'],
+  '/settings/ai-engine': ['Settings Workspace', 'AI Engine'],
+  '/settings/alert-policy': ['Settings Workspace', 'Alert Policy'],
+  '/settings/workspace': ['Settings Workspace', 'Workspace'],
+  '/settings/database': ['Settings Workspace', 'Database'],
 }
 
 export default function Topbar({ onOpenMobile }) {

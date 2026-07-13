@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar'
 import Topbar from '../components/Topbar'
 
 const COLLAPSE_KEY = 'shm_sidebar_collapsed'
+export const COLLAPSE_EVENT = 'shm-sidebar-collapse-change'
 
 export default function AppShell() {
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === '1')
@@ -13,6 +14,15 @@ export default function AppShell() {
   useEffect(() => {
     localStorage.setItem(COLLAPSE_KEY, collapsed ? '1' : '0')
   }, [collapsed])
+
+  // Settings > Workspace can flip this same preference from a different
+  // route; listen for its custom event (same-tab) so the sidebar updates
+  // immediately without a page reload.
+  useEffect(() => {
+    const onExternalChange = e => setCollapsed(!!e.detail)
+    window.addEventListener(COLLAPSE_EVENT, onExternalChange)
+    return () => window.removeEventListener(COLLAPSE_EVENT, onExternalChange)
+  }, [])
 
   // Close the mobile drawer automatically whenever the route changes.
   useEffect(() => {

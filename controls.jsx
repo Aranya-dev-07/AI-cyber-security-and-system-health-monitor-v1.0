@@ -1,15 +1,6 @@
 import { useSystemStatus } from '../../context/SystemStatusContext'
 import { Card, SectionHeader, fmt, fmtT } from '../../components/ui'
-
-// Static reference values matching config.py's module-level constants.
-// No endpoint exposes these live, so they're presented explicitly as
-// configured defaults rather than fetched data — never faked as live.
-const THRESHOLDS = [
-  { label: 'CPU Threshold',     value: '85 %',      note: 'Alert above this usage' },
-  { label: 'RAM Threshold',     value: '85 %',      note: 'Alert above this usage' },
-  { label: 'Network Threshold', value: '100 MB',    note: 'Per collection interval' },
-  { label: 'Poll Interval',     value: '5 s',       note: 'Time between collection cycles' },
-]
+import { MONITORING_THRESHOLDS } from '../../components/constants'
 
 function InfoRow({ label, value }) {
   return (
@@ -47,7 +38,7 @@ export default function Controls() {
         {/* Configured thresholds — static reference, no live endpoint exists */}
         <Card>
           <SectionHeader title="Configured Thresholds" subtitle="Reference values from config.py" dot="var(--lavender)"/>
-          {THRESHOLDS.map(t => (
+          {MONITORING_THRESHOLDS.map(t => (
             <div key={t.label} style={{ padding: '9px 0', borderBottom: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                 <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t.label}</span>
