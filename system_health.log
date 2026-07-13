@@ -586,3 +586,23 @@
 2026-07-13 17:58:12,312 [INFO] __main__: Starting FastAPI server on http://127.0.0.1:8000
 2026-07-13 17:58:12,507 [INFO] database: Database initialized successfully at 'system_monitor.db'.
 2026-07-13 17:58:12,508 [INFO] api: API startup complete: database initialized.
+2026-07-13 17:58:23,050 [INFO] database: Inserted test_run row with id=14.
+2026-07-13 17:58:23,055 [INFO] __main__: Stamped Run 14 header into CSV files.
+2026-07-13 17:58:23,055 [INFO] __main__: Monitoring loop started for run_id=14.
+2026-07-13 17:58:23,056 [INFO] __main__: start_monitoring() succeeded; run_id=14.
+2026-07-13 17:58:24,203 [WARNING] config: ALERT triggered for RAM: value=89.70 exceeded threshold=85.00
+2026-07-13 17:58:24,207 [INFO] config: Collected system metrics: CPU=15.4% RAM=89.7% DISK=94.2% NET_SENT=0.000MB NET_RECV=0.000MB
+2026-07-13 17:58:55,156 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-13 17:58:55,202 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=100.0% score=-0.5909 | RAM usage (89.7%) exceeds the configured threshold (85.0%).
+2026-07-13 17:58:56,571 [WARNING] config: ALERT triggered for RAM: value=95.60 exceeded threshold=85.00
+2026-07-13 17:58:56,573 [INFO] config: Collected system metrics: CPU=15.5% RAM=95.6% DISK=94.2% NET_SENT=0.206MB NET_RECV=1.025MB
+2026-07-13 17:59:28,814 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-13 17:59:28,894 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=100.0% score=-0.5296 | RAM usage (95.6%) exceeds the configured threshold (85.0%).
+2026-07-13 17:59:30,208 [WARNING] config: ALERT triggered for RAM: value=91.30 exceeded threshold=85.00
+2026-07-13 17:59:30,211 [INFO] config: Collected system metrics: CPU=19.6% RAM=91.3% DISK=94.2% NET_SENT=0.094MB NET_RECV=0.149MB
+2026-07-13 17:59:53,018 [INFO] config: Generated run summary: duration=89.99s avg_cpu=16.83% avg_ram=92.20% avg_disk=94.20% alerts=3
+2026-07-13 17:59:53,638 [INFO] config: Collected top 5 processes by CPU usage.
+2026-07-13 17:59:53,942 [INFO] database: Updated test_run id=14 with end_time and final alert_count.
+2026-07-13 17:59:53,985 [INFO] __main__: stop_monitoring() completed for run_id=14.
+2026-07-13 17:59:54,146 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=98.2% score=-0.4819 | RAM usage (91.3%) exceeds the configured threshold (85.0%).
+2026-07-13 17:59:54,174 [INFO] __main__: Monitoring loop exited cleanly for run_id=14.
