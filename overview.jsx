@@ -107,7 +107,7 @@ function HealthOverview({ health }) {
               <span style={{ fontSize: 13, fontWeight: 600, color, textTransform: 'uppercase', letterSpacing: 0.5 }}>{health.status}</span>
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.5, marginTop: 10, flex: 1 }}>{health.historical_comparison}</div>
-            <Link to="/ai/health-score" style={{ fontSize: 12, fontWeight: 600, color: 'var(--lavender-deep)', textDecoration: 'none', marginTop: 12 }}>View full health analysis →</Link>
+            <Link to="/ai/workspace/health-score" style={{ fontSize: 12, fontWeight: 600, color: 'var(--lavender-deep)', textDecoration: 'none', marginTop: 12 }}>View full health analysis →</Link>
           </>
       }
     </Card>
@@ -116,12 +116,12 @@ function HealthOverview({ health }) {
 
 // ─── Quick Actions ───────────────────────────────────────────────────────
 const QUICK_ACTIONS = [
-  { to: '/processes',           label: 'Processes',            desc: 'Top resource consumers', icon: 'list' },
-  { to: '/runs',                label: 'Run History',          desc: 'Past monitoring sessions', icon: 'clock' },
-  { to: '/ai/anomalies',        label: 'Anomaly Detection',    desc: 'Isolation Forest inference', icon: 'alert' },
-  { to: '/ai/root-cause',       label: 'Root Cause Analysis',  desc: 'Why anomalies happened', icon: 'search' },
-  { to: '/ai/recommendations',  label: 'Recommendations',      desc: 'Prioritized AI advice', icon: 'bulb' },
-  { to: '/ai/trends',           label: 'Trend Analysis',       desc: 'Sustained trends vs spikes', icon: 'trend' },
+  { to: '/monitoring/processes',        label: 'Processes',            desc: 'Top resource consumers', icon: 'list' },
+  { to: '/runs',                        label: 'Run History',          desc: 'Past monitoring sessions', icon: 'clock' },
+  { to: '/ai/workspace/anomalies',      label: 'Anomaly Detection',    desc: 'Isolation Forest inference', icon: 'alert' },
+  { to: '/ai/workspace/root-cause',     label: 'Root Cause Analysis',  desc: 'Why anomalies happened', icon: 'search' },
+  { to: '/ai/workspace/recommendations',label: 'Recommendations',      desc: 'Prioritized AI advice', icon: 'bulb' },
+  { to: '/ai/workspace/trends',         label: 'Trend Analysis',       desc: 'Sustained trends vs spikes', icon: 'trend' },
 ]
 
 function QuickActions() {
@@ -195,7 +195,7 @@ function AIOverviewCard({ aiStats }) {
           {aiStats?.model_trained ? `Trained · ${aiStats?.total_predictions ?? 0} predictions` : 'Model not yet trained'}
         </span>
       </div>
-      <Link to="/ai/anomalies" style={{ fontSize: 12, fontWeight: 600, color: 'var(--lavender-deep)', textDecoration: 'none', marginTop: 'auto' }}>Open Anomaly Detection →</Link>
+      <Link to="/ai/workspace/anomalies" style={{ fontSize: 12, fontWeight: 600, color: 'var(--lavender-deep)', textDecoration: 'none', marginTop: 'auto' }}>Open Anomaly Detection →</Link>
     </Card>
   )
 }

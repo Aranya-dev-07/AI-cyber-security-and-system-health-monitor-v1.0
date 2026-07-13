@@ -1,5 +1,5 @@
 import { useSystemStatus } from '../../context/SystemStatusContext'
-import { Card, SectionHeader, fmt, severityColor, severityBg } from '../../components/ui'
+import { Card, SectionHeader, fmt, severityColor, severityBg, ConfidenceBar } from '../../components/ui'
 
 export default function Predictive() {
   const { predictiveAlerts } = useSystemStatus()
@@ -20,10 +20,13 @@ export default function Predictive() {
                   <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>ETA {a.estimated_time_until}</span>
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5, marginBottom: 6 }}>{a.explanation}</div>
-                <div style={{ display: 'flex', gap: 16, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)', flexWrap: 'wrap', marginBottom: 6 }}>
+                <div style={{ display: 'flex', gap: 16, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)', flexWrap: 'wrap', marginBottom: 8 }}>
                   <span>Horizon: <b style={{ color: 'var(--text)' }}>{a.horizon_minutes}m</b></span>
                   <span>Probability: <b style={{ color: 'var(--text)' }}>{fmt(a.probability)}%</b></span>
-                  <span>Confidence: <b style={{ color: 'var(--text)' }}>{fmt(a.confidence)}%</b></span>
+                </div>
+                <div style={{ marginBottom: 8, maxWidth: 260 }}>
+                  <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: 0.6, textTransform: 'uppercase', marginBottom: 4 }}>AI Confidence</div>
+                  <ConfidenceBar value={a.confidence} color={severityColor(a.predicted_severity)}/>
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 4 }}>Likely cause: {a.root_cause_likelihood}</div>
                 <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', fontSize: 12, color: 'var(--text)', borderLeft: '3px solid var(--peach-deep)' }}>{a.recommended_action}</div>

@@ -15,10 +15,7 @@ const NAV_GROUPS = [
     label: 'AI Insights',
     accent: true,
     items: [
-      { to: '/ai/anomalies', label: 'Anomaly Detection', icon: 'alert' },
       { to: '/ai/workspace', label: 'AI Workspace', icon: 'layers' },
-      { to: '/ai/trends', label: 'Trend Analysis', icon: 'trend' },
-      { to: '/ai/predictive', label: 'Predictive Alerts', icon: 'radar' },
     ],
   },
 ]

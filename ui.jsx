@@ -91,6 +91,33 @@ export function Gauge({ label, value, unit = '%', color = 'var(--mint-deep)', wa
   )
 }
 
+// ─── EventTimeline ───────────────────────────────────────────────────────
+// Vertical connected timeline for chronological AI events (used by the
+// Anomaly Detection tab to visualize the detection history).
+export function EventTimeline({ events }) {
+  if (!events || events.length === 0) {
+    return <div style={{ color: 'var(--text-muted)', fontSize: 13, padding: '12px 0' }}>No events recorded yet.</div>
+  }
+  return (
+    <div className="timeline">
+      {events.map((e, i) => (
+        <div className="timeline-item" key={i}>
+          <div className="timeline-dot" style={{ borderColor: severityColor(e.severity) }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: severityColor(e.severity) }}/>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{e.title}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', flexShrink: 0 }}>{fmtT(e.timestamp)}</span>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, lineHeight: 1.5 }}>{e.description}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ─── SearchInput ─────────────────────────────────────────────────────────
 export function SearchInput({ value, onChange, placeholder = 'Search…' }) {
   return (

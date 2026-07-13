@@ -1,5 +1,5 @@
 import { useSystemStatus } from '../../context/SystemStatusContext'
-import { Card, SectionHeader, fmt, severityColor, severityBg } from '../../components/ui'
+import { Card, SectionHeader, fmt, severityColor, severityBg, ConfidenceBar } from '../../components/ui'
 
 export default function Trends() {
   const { trendAnalysis } = useSystemStatus()
@@ -23,11 +23,11 @@ export default function Trends() {
                 </div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t.trend_name}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: 6 }}>{t.explanation}</div>
-                <div style={{ display: 'flex', gap: 14, fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 14, fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', flexWrap: 'wrap', marginBottom: 8 }}>
                   <span>Duration: <b style={{ color: 'var(--text)' }}>{fmt(t.duration_minutes)}m</b></span>
                   <span>Rate: <b style={{ color: 'var(--text)' }}>{fmt(t.rate_of_change_per_min, 2)}%/min</b></span>
-                  <span>Confidence: <b style={{ color: 'var(--text)' }}>{fmt(t.confidence)}%</b></span>
                 </div>
+                <ConfidenceBar value={t.confidence} color={severityColor(t.severity)}/>
               </div>
             ))}
           </div>

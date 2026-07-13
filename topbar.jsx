@@ -9,12 +9,12 @@ const PAGE_TITLES = {
   '/monitoring/graphs': ['Monitoring Workspace', 'Graphs'],
   '/monitoring/controls': ['Monitoring Workspace', 'Controls'],
   '/runs': ['Run History', 'Past monitoring sessions'],
-  '/ai/anomalies': ['Anomaly Detection', 'Isolation Forest · real-time inference'],
-  '/ai/workspace/health-score': ['Trinetra AI Workspace', 'AI Health Score'],
+  '/ai/workspace/anomalies': ['Trinetra AI Workspace', 'Anomaly Detection'],
   '/ai/workspace/root-cause': ['Trinetra AI Workspace', 'Root Cause Analysis'],
+  '/ai/workspace/health-score': ['Trinetra AI Workspace', 'AI Health Score'],
+  '/ai/workspace/trends': ['Trinetra AI Workspace', 'Trend Analysis'],
+  '/ai/workspace/predictive': ['Trinetra AI Workspace', 'Predictive Alerts'],
   '/ai/workspace/recommendations': ['Trinetra AI Workspace', 'AI Recommendations'],
-  '/ai/trends': ['Trend Analysis', 'Sustained trends vs. temporary spikes'],
-  '/ai/predictive': ['Predictive Alerts', 'Forecasted issues, not yet occurred'],
 }
 
 export default function Topbar({ onOpenMobile }) {
