@@ -634,3 +634,11 @@
 2026-07-14 20:48:15,164 [INFO] config: Collected top 5 processes by CPU usage.
 2026-07-14 20:48:15,233 [WARNING] ai_engine: AI ALERT | severity=CRITICAL confidence=99.4% score=-0.4942 | RAM usage (93.6%) exceeds the configured threshold (85.0%).
 2026-07-14 20:48:15,267 [INFO] __main__: Monitoring loop exited cleanly for run_id=15.
+2026-07-14 20:52:36,175 [INFO] dashboard: Dashboard mounted at /dashboard/ (serving from 'C:\Users\Tapas\AI-cyber-security-and-system-health-monitor-v1.0\AI-cyber-security-and-system-health-monitor-v1.0\dashboard\dist').
+2026-07-14 20:52:36,194 [INFO] database: Database initialized successfully at 'system_monitor.db'.
+2026-07-14 20:52:36,194 [INFO] ai_engine: Isolation Forest initialized: n_estimators=100 contamination=auto
+2026-07-14 20:52:36,241 [INFO] ai_engine: Loaded saved model from 'C:\Users\Tapas\AI-cyber-security-and-system-health-monitor-v1.0\AI-cyber-security-and-system-health-monitor-v1.0\models\isolation_forest.joblib'.
+2026-07-14 20:52:36,242 [INFO] __main__: API server thread launched.
+2026-07-14 20:52:36,410 [INFO] __main__: Starting FastAPI server on http://127.0.0.1:8000
+2026-07-14 20:52:36,549 [INFO] database: Database initialized successfully at 'system_monitor.db'.
+2026-07-14 20:52:36,551 [INFO] api: API startup complete: database initialized.
